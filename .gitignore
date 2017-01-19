@@ -1,0 +1,5 @@
+/node_modules*
+/assets/js/vendor*
+humans.txt
+robots.txt
+LICENSE.txt
