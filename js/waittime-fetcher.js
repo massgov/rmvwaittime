@@ -6,7 +6,7 @@
   'use strict';
   // API URL
   // var rmvWaitTimeURL = 'https://www.massdot.state.ma.us/feeds/qmaticxml/qmaticXML.aspx';
-  var rmvWaitTimeURL = '/waittime.xml';
+  var rmvWaitTimeURL = '../waittime.xml';
 
 
   // Get branch css path iframe src URL (passed by drupal content authors) -- url parser helper in Mayflower
@@ -40,15 +40,25 @@
     branch.processedLicensing = branch.licensing == '00:00:00' ? 'No wait time' : branch.procssedLicensing;
     branch.processedRegistration = branch.registration == '00:00:00' ? 'No wait time' : branch.procssedRegistration;
 
-    // singular minute/hour for 1, plural for +1 (no abbreviations)
 
     // < 1 minute = 'Less than a minute'
     branch.processedLicensing = branch.licensing.includes('00:00:') ? 'Less than a minute' : branch.procssedLicensing;
     branch.processedRegistration = branch.registration.includes('00:00:') ? 'Less than a minute' : branch.procssedRegistration;
 
+    // explode string into array
+    var licensingArray = branch.licensing.split(":");
+    var registrationArray = branch.registration.split(":");
+
+    // if [0] == 1 string += 1 hour
+    // if [0] > 1 string += [0] hours
+    // >> if [1], string += [1] round up to quarter hour minutes when not = 0
+
+    console.log(licensingArray);
+    console.log(registrationArray);
+
+    // singular minute/hour for 1, plural for +1 (no abbreviations)
 
     // < 1 hour: round to the minute
-
 
     // > 1 hour: round to the quarter hour
 
