@@ -6,7 +6,7 @@
   'use strict';
   // API URL
   // var rmvWaitTimeURL = 'https://www.massdot.state.ma.us/feeds/qmaticxml/qmaticXML.aspx';
-  var rmvWaitTimeURL = '../waittime.xml';
+  var rmvWaitTimeURL = 'waittime.xml';
 
 
   // Get branch css path iframe src URL (passed by drupal content authors) -- url parser helper in Mayflower
