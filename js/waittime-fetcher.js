@@ -141,31 +141,53 @@ if (!String.prototype.startsWith) {
       displayTime = 'Less than a minute';
       return displayTime;
     }
-    // Everything else.
-    else {
-      // Create locale with widget time config.
-      moment.updateLocale('rmv', {
-        relativeTime : {
-          s:  "Less than a minute",
-          m:  "1 minute",
-          mm: "%d minutes",
-          h:  "1 hour",
-          hh: "%d hours"
-        },
-        relativeTimeThreshold : {
-          s:  10,
-          m:  30,
-          h:  20
-        }
-      });
 
-      // @todo troubleshoot seconds rounding minute down
-      // @todo figure out rounding so that minutes are still shown for 1+ hour
-      // Use newly created locale.
-      moment.locale('rmv');
+    // Everything Else.
 
-      displayTime = moment.duration(waitTime).humanize();
+    // Create a moment duration with the waitTime string.
+    var m = moment.duration(waitTime);
+
+    // Declare moment formatter template partials.
+    var hourTemplate = '',
+      minuteTemplate = '';
+
+    // Round minutes up to nearest 15 if there is 1+ hour.
+    if (( m.hours() >= 1 ) && (m.minutes() != 0 )) {
+        var remainder = 15 - m.minutes() % 15;
+        m = moment.duration(m).add(remainder,"minutes");
     }
+    else {
+      // Round minutes up if there are 15+ seconds.
+      if (m.seconds() >= 15) {
+        m = moment.duration(m).add(1, "minutes");
+      }
+    }
+
+    // Set hour template partial.
+    if (( m.hours() > 1 )) {
+      hourTemplate = "h [hours]";
+    }
+    if (( m.hours() == 1 )) {
+      hourTemplate = "h [hour]";
+    }
+
+    // Set minute template partial.
+    if (m.minutes() == 1) {
+      minuteTemplate = "m [minute]";
+    }
+    if (m.minutes() > 1) {
+      minuteTemplate = "m [minutes]";
+    }
+
+    // Create format template from partials:
+    // - only add a ', ' in between partials if we have them both
+    // - otherwise, just write them both (since one of them is empty)
+    var template = hourTemplate && minuteTemplate
+      ? hourTemplate + ', ' + minuteTemplate
+      : hourTemplate + minuteTemplate;
+
+    // Apply the template to the duration
+    displayTime = m.format({ template: template});
 
     return displayTime;
   }
