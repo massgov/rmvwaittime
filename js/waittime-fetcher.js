@@ -129,14 +129,17 @@ if (!String.prototype.startsWith) {
     // Closed = 'Closed'.
     if (waitTime == 'Closed') {
       displayTime = 'Closed';
+      return displayTime;
     }
     // 0 = 'No wait time'.
-    else if (waitTime == '00:00:00') {
+    if (waitTime == '00:00:00') {
       displayTime = 'No wait time';
+      return displayTime;
     }
     // < 1 minute = 'Less than a minute'.
-    else if (waitTime.startsWith('00:00:')) {
+    if (waitTime.startsWith('00:00:')) {
       displayTime = 'Less than a minute';
+      return displayTime;
     }
     // Everything else.
     else {
