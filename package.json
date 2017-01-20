@@ -1,0 +1,25 @@
+{
+  "name": "rmv-waittime",
+  "version": "0.0.1",
+  "description": "Gets, transforms, and renders the wait times for a specific rmv branch.",
+  "main": "main.js",
+  "dependencies": {
+    "chai": "^3.5.0",
+    "moment": "^2.17.1",
+    "moment-duration-format": "^1.3.0"
+    "requirejs": "^2.3.2"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jesconstantine/rmvwaittime.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/jesconstantine/rmvwaittime/issues"
+  },
+  "homepage": "https://github.com/jesconstantine/rmvwaittime#readme"
+}
