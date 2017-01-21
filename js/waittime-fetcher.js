@@ -152,9 +152,11 @@ if (!String.prototype.startsWith) {
       minuteTemplate = '';
 
     // Round minutes up to nearest 15 if there is 1+ hour.
-    if (( m.hours() >= 1 ) && (m.minutes() != 0 )) {
+    if ( m.hours() >= 1 ) {
+      if (m.minutes() != 0 ) { // Do not round 0 minutes up to 15.
         var remainder = 15 - m.minutes() % 15;
-        m = moment.duration(m).add(remainder,"minutes");
+        m = moment.duration(m).add(remainder, "minutes");
+      }
     }
     else {
       // Round minutes up if there are 15+ seconds.
