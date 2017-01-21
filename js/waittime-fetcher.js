@@ -103,6 +103,9 @@ if (!String.prototype.startsWith) {
     if (urlParams[branchParamName]) {
       return urlParams[branchParamName];
     }
+    else {
+      throw new Error("No town parameter passed.");
+    }
   }
 
   /**
@@ -218,12 +221,24 @@ if (!String.prototype.startsWith) {
    * @returns {Object.} An object of the requested branch wait time stings for 'licensing' and 'registration'.
    */
   function getBranch(xml) {
-    var location = getLocation();
-    var $branch = $(xml).find('branch').filter(function() { return $(this).find('town').text() == location; });
-    return {
-      "licensing": $branch.find('licensing').text(),
-      "registration": $branch.find('registration').text()
-    };
+    try {
+      var location = getLocation();
+    }
+    catch(e) {
+      console.log(e);
+    }
+    if (location) {
+      var $branch = $(xml).find('branch').filter(function () {
+        return $(this).find('town').text() == location;
+      });
+      if ($branch.length) {
+        return {
+          "licensing": $branch.find('licensing').text(),
+          "registration": $branch.find('registration').text()
+        };
+      }
+      throw new Error('Could not find wait time information for provided location.');
+    }
   }
 
   /**
@@ -241,8 +256,17 @@ if (!String.prototype.startsWith) {
       dataType: 'xml'
     })
       .done(function(data){
-        var branch = getBranch(data); // Only send the data for the branch that we need.
-        promise.resolve(branch);
+        try {
+          var branch = getBranch(data); // Only send the data for the branch that we need.
+        }
+        catch (e) {
+          console.log(e);
+        }
+        if (branch) {
+          promise.resolve(branch);
+        }
+
+        promise.reject();
     })
       .fail(function(){
         promise.reject();
@@ -271,6 +295,10 @@ if (!String.prototype.startsWith) {
           processedRegistration: 'Estimation unavailable'
         });
         el.removeClass('visually-hidden');
+
+        // Do not try to keep running
+        clearInterval(waitTimeRefresh);
+        // console.info('Script will not refresh.')
       });
   }
   // Update the wait times once then set interval to update again every minute.
