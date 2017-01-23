@@ -56,13 +56,6 @@ module.exports = {
 })(window, document);
 
 },{"./modules/rmvWaitTime.js":4}],4:[function(require,module,exports){
-/**
- * @file
- * RMV Wait Time Component Script
- * Gets, transforms, and renders the wait times for a specific rmv branch.
- * See ticket: https://jira.state.ma.us/browse/DP-822
- */
-
 // Helpers
 var dateTime = require("../helpers/dateTime.js");
 var urlParser = require("../helpers/urlParser.js");
@@ -71,6 +64,12 @@ var urlParser = require("../helpers/urlParser.js");
 var moment = require("moment");
 require("moment-duration-format");
 
+/**
+* @function
+* RMV Wait Time module
+* Gets, transforms, and renders the wait times for a specific rmv branch.
+* See ticket: https://jira.state.ma.us/browse/DP-822
+*/
 module.exports = function($) {
   "use strict";
 
@@ -79,11 +78,7 @@ module.exports = function($) {
 
   // The API URL.
   // var rmvWaitTimeURL = 'https://www.massdot.state.ma.us/feeds/qmaticxml/qmaticXML.aspx';
-  var rmvWaitTimeURL = '/data/waittime.xml'; // local stub
-
-  // @todo Get branch css path iframe src URL (passed by drupal content authors) -- url parser helper in Mayflower
-  // @todo Get branch js path iframe src URL (passed by drupal content authors) -- url parser helper in Mayflower
-
+  var rmvWaitTimeURL = 'data/waittime.xml'; // local stub
 
   /**
    * Render the transformed wait times for the requested branch on the page.

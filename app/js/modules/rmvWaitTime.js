@@ -20,7 +20,7 @@ module.exports = function($) {
 
   // The API URL.
   // var rmvWaitTimeURL = 'https://www.massdot.state.ma.us/feeds/qmaticxml/qmaticXML.aspx';
-  var rmvWaitTimeURL = '/data/waittime.xml'; // local stub
+  var rmvWaitTimeURL = 'data/waittime.xml'; // local stub
 
   /**
    * Render the transformed wait times for the requested branch on the page.
