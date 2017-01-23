@@ -1,3 +1,823 @@
+(function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
+/**
+ * Get the current time to show when latest wait times were updated.
+ * @function
+ * @returns {String.} String of the current time (5:48 PM).
+ * @todo move this functionality into a mayflower helper?
+ */
+ 
+module.exports = {
+  getCurrentTime: function() {
+    var now = new Date(),
+      hours = now.getHours(),
+      minutes = now.getMinutes();
+
+    var ampm = hours >= 12 ? 'pm' : 'am';
+    hours = hours % 12;
+    hours = hours ? hours : 12; // the hour '0' should be '12'
+    minutes = minutes < 10 ? '0' + minutes : minutes;
+
+    return hours + ':' + minutes + ampm;
+  }
+};
+
+},{}],2:[function(require,module,exports){
+/**
+ * Parse the URL querystring parameters.
+ * @function
+ * @returns {Array.} Array of the querystring parameter keys.
+ * @todo move this functionality into a mayflower helper
+ */
+module.exports = {
+  parseParamsFromUrl: function() {
+    var params = {};
+    var parts = window.location.search.substr(1).split('&');
+    for (var i = 0; i < parts.length; i++) {
+      var keyValuePair = parts[i].split('=');
+      var key = decodeURIComponent(keyValuePair[0]);
+      params[key] = keyValuePair[1] ?
+        decodeURIComponent(keyValuePair[1].replace(/\+/g, ' ')) :
+        keyValuePair[1];
+    }
+    return params;
+  }
+};
+
+},{}],3:[function(require,module,exports){
+(function(window, document){
+  "use strict";
+
+  var waitTime = require("./modules/rmvWaitTime.js");
+
+  // Update the wait times once then set interval to update again every minute.
+  waitTime.updateTimes();
+  waitTime.waitTimeRefresh();
+  
+})(window, document);
+
+},{"./modules/rmvWaitTime.js":4}],4:[function(require,module,exports){
+/**
+ * @file
+ * RMV Wait Time Component Script
+ * Gets, transforms, and renders the wait times for a specific rmv branch.
+ * See ticket: https://jira.state.ma.us/browse/DP-822
+ */
+
+// Helpers
+var dateTime = require("../helpers/dateTime.js");
+var urlParser = require("../helpers/urlParser.js");
+
+// Libraries
+var moment = require("moment");
+require("moment-duration-format");
+
+module.exports = function($) {
+  "use strict";
+
+  // Cache the wait time container selector.
+  var el = $('.ma__wait-time');
+
+  // The API URL.
+  // var rmvWaitTimeURL = 'https://www.massdot.state.ma.us/feeds/qmaticxml/qmaticXML.aspx';
+  var rmvWaitTimeURL = '/data/waittime.xml'; // local stub
+
+  // @todo Get branch css path iframe src URL (passed by drupal content authors) -- url parser helper in Mayflower
+  // @todo Get branch js path iframe src URL (passed by drupal content authors) -- url parser helper in Mayflower
+
+
+  /**
+   * Render the transformed wait times for the requested branch on the page.
+   * @function
+   * @param {Object} data branch display data with processed wait times.
+   */
+  var render = function(data) {
+    var $licensing = $('span[data-variable="licensing"]');
+    $licensing.text(data.processedLicensing);
+
+    var $registration = $('span[data-variable="registration"]');
+    $registration.text(data.processedRegistration);
+
+    var $timestamp = $('span[data-variable="timestamp"]');
+    var time = dateTime.getCurrentTime();
+    $timestamp.text(time);
+  };
+
+  /**
+   * Get branch town value.
+   * @function
+   * @returns {String.} The name of the town passed to the script.
+   */
+  var getLocation = function() {
+    var urlParams = urlParser.parseParamsFromUrl();
+
+    // Define param for the branch town query.
+    var branchParamName = 'town';
+
+    if (urlParams[branchParamName]) {
+      return urlParams[branchParamName];
+    }
+    else {
+      throw new Error("No town parameter passed.");
+    }
+  };
+
+  /**
+   * Transform the wait time raw strings into processed wait time strings according to ticket spec.
+   * @function
+   * @param {String} waitTime is the raw wait time for either the branch licensing or registration.
+   * @returns {String.} A transformed wait time duration in human readable format.
+   *
+   * Specs from ticket (see link at top of file):
+   * Closed = Closed
+   * 00:00:00 = No wait time
+   * < 1 minute = Less than a minute
+   * if hours == 1 ... string += 1 hour
+   * if hours > 1 string += [0] hours
+   *  >> if [1], string += [1] round up to quarter hour minutes when not = 0
+   * singular minute/hour for 1, plural for +1 (no abbreviations)
+   * < 1 hour: round to the minute
+   * > 1 hour: round to the quarter hour
+   */
+  var transformTime = function(waitTime) {
+    // Default to unavailable.
+    var displayTime = 'Estimation unavailable';
+
+    // Closed = 'Closed'.
+    if (waitTime == 'Closed') {
+      displayTime = 'Closed';
+      return displayTime;
+    }
+
+    // 0 = 'No wait time'.
+    if (waitTime == '00:00:00') {
+      displayTime = 'No wait time';
+      return displayTime;
+    }
+
+    // < 1 minute = 'Less than a minute'.
+    if (waitTime.startsWith('00:00:')) {
+      displayTime = 'Less than a minute';
+      return displayTime;
+    }
+
+    // Everything else: format the time string.
+
+    // Create a moment duration with the waitTime string.
+    var m = moment.duration(waitTime);
+
+    // Declare moment formatter template partials.
+    var hourTemplate = '',
+      minuteTemplate = '';
+
+    // Round minutes up to nearest 15 if there is 1+ hour.
+    if ( m.hours() >= 1 ) {
+      if (m.minutes() != 0 ) { // Do not round 0 minutes up to 15.
+        var remainder = 15 - m.minutes() % 15;
+        m = moment.duration(m).add(remainder, "minutes");
+      }
+    }
+    else {
+      // Round minutes up if there are 15+ seconds.
+      if (m.seconds() >= 15) {
+        m = moment.duration(m).add(1, "minutes");
+      }
+    }
+
+    // Set hour template partial.
+    if (( m.hours() > 1 )) {
+      hourTemplate = "h [hours]";
+    }
+    if (( m.hours() == 1 )) {
+      hourTemplate = "h [hour]";
+    }
+
+    // Set minute template partial.
+    if (m.minutes() == 1) {
+      minuteTemplate = "m [minute]";
+    }
+    if (m.minutes() > 1) {
+      minuteTemplate = "m [minutes]";
+    }
+
+    // Create format template from partials:
+    // - only add a ', ' in between partials if we have them both
+    // - otherwise, just write them both (since one of them is empty)
+    var template = hourTemplate && minuteTemplate
+      ? hourTemplate + ', ' + minuteTemplate
+      : hourTemplate + minuteTemplate;
+
+    // Apply the template to the duration
+    displayTime = m.format({ template: template});
+
+    return displayTime;
+  };
+
+  /**
+   * Pass the wait time raw strings into function to transform wait time strings according to ticket spec.
+   * @function
+   * @param {Object} branch contains wait time strings for licensing and registration.
+   * @returns {Object.} An object of the requested branch with additional processed wait time stings for 'licensing'
+   * and 'registration'.
+   */
+  var processWaitTimes = function(branch) {
+
+    // Pass each wait time string (licensing + registration) through transform function.
+    branch.processedLicensing = transformTime(branch.licensing);
+    branch.processedRegistration = transformTime(branch.registration);
+
+    console.log(branch);
+    return branch;
+  };
+
+  /**
+   * Extract the specific branch wait times from xml feed.
+   * @function
+   * @param {xml} xml feed of rmv <branches> wait time data.
+   * @returns {Object.} An object of the requested branch wait time stings for 'licensing' and 'registration'.
+   */
+  var getBranch = function(xml) {
+    try {
+      var location = getLocation();
+    }
+    catch(e) {
+      console.log(e);
+    }
+    if (location) {
+      var $branch = $(xml).find('branch').filter(function () {
+        return $(this).find('town').text() == location;
+      });
+      if ($branch.length) {
+        return {
+          "licensing": $branch.find('licensing').text(),
+          "registration": $branch.find('registration').text()
+        };
+      }
+      throw new Error('Could not find wait time information for provided location.');
+    }
+  };
+
+  /**
+   * Get the rmv wait times for a specific branch.
+   * @function
+   * @returns {Promise.} A promise which contains only the requested branch's wait times on success.
+   */
+  var getBranchData = function() {
+    var promise = $.Deferred(); // promise returned by function
+
+    $.ajax({ // ajax() returns a promise
+      type: 'GET',
+      url: rmvWaitTimeURL,
+      cache: false,
+      dataType: 'xml'
+    })
+    .done(function(data){
+      try {
+        var branch = getBranch(data); // Only send the data for the branch that we need.
+      }
+      catch (e) {
+        console.log(e);
+      }
+      if (branch) {
+        promise.resolve(branch);
+      }
+
+      promise.reject();
+    })
+    .fail(function(){
+      promise.reject();
+    });
+
+    return promise;
+  }
+
+  /**
+   * Gets, transforms, and renders the wait times for a specific rmv branch.
+   * @function
+   */
+  var updateTimes = function() {
+    // get the branch data
+    getBranchData()
+      .done(function(branchData){
+        // transform data
+        var branchDisplayData = processWaitTimes(branchData);
+        // render information
+        render(branchDisplayData);
+        el.removeClass('visually-hidden');
+      })
+      .fail(function(){
+        render({
+          processedLicensing: 'Estimation unavailable',
+          processedRegistration: 'Estimation unavailable'
+        });
+        el.removeClass('visually-hidden');
+
+        // Do not try to keep running
+        stopWaitTimeRefresh();
+      });
+  };
+
+  // Define setInterval reference variable inside module so we can clear it from within.
+  var refreshTimer = null;
+
+  var waitTimeRefresh = function() {
+    refreshTimer = setInterval(this.updateTimes, 60000);
+  };
+
+  var stopWaitTimeRefresh = function() {
+    clearInterval(refreshTimer);
+  };
+
+  return {
+    updateTimes: updateTimes,
+    waitTimeRefresh: waitTimeRefresh
+  }
+}(jQuery);
+
+},{"../helpers/dateTime.js":1,"../helpers/urlParser.js":2,"moment":6,"moment-duration-format":5}],5:[function(require,module,exports){
+/*! Moment Duration Format v1.3.0
+ *  https://github.com/jsmreese/moment-duration-format 
+ *  Date: 2014-07-15
+ *
+ *  Duration format plugin function for the Moment.js library
+ *  http://momentjs.com/
+ *
+ *  Copyright 2014 John Madhavan-Reese
+ *  Released under the MIT license
+ */
+
+(function (root, undefined) {
+
+	// repeatZero(qty)
+	// returns "0" repeated qty times
+	function repeatZero(qty) {
+		var result = "";
+		
+		// exit early
+		// if qty is 0 or a negative number
+		// or doesn't coerce to an integer
+		qty = parseInt(qty, 10);
+		if (!qty || qty < 1) { return result; }
+		
+		while (qty) {
+			result += "0";
+			qty -= 1;
+		}
+		
+		return result;
+	}
+	
+	// padZero(str, len [, isRight])
+	// pads a string with zeros up to a specified length
+	// will not pad a string if its length is aready
+	// greater than or equal to the specified length
+	// default output pads with zeros on the left
+	// set isRight to `true` to pad with zeros on the right
+	function padZero(str, len, isRight) {
+		if (str == null) { str = ""; }
+		str = "" + str;
+		
+		return (isRight ? str : "") + repeatZero(len - str.length) + (isRight ? "" : str);
+	}
+	
+	// isArray
+	function isArray(array) {
+		return Object.prototype.toString.call(array) === "[object Array]";
+	}
+	
+	// isObject
+	function isObject(obj) {
+		return Object.prototype.toString.call(obj) === "[object Object]";
+	}
+	
+	// findLast
+	function findLast(array, callback) {
+		var index = array.length;
+
+		while (index -= 1) {
+			if (callback(array[index])) { return array[index]; }
+		}
+	}
+
+	// find
+	function find(array, callback) {
+		var index = 0,
+			max = array.length,
+			match;
+			
+		if (typeof callback !== "function") {
+			match = callback;
+			callback = function (item) {
+				return item === match;
+			};
+		}
+
+		while (index < max) {
+			if (callback(array[index])) { return array[index]; }
+			index += 1;
+		}
+	}
+	
+	// each
+	function each(array, callback) {
+		var index = 0,
+			max = array.length;
+			
+		if (!array || !max) { return; }
+
+		while (index < max) {
+			if (callback(array[index], index) === false) { return; }
+			index += 1;
+		}
+	}
+	
+	// map
+	function map(array, callback) {
+		var index = 0,
+			max = array.length,
+			ret = [];
+
+		if (!array || !max) { return ret; }
+				
+		while (index < max) {
+			ret[index] = callback(array[index], index);
+			index += 1;
+		}
+		
+		return ret;
+	}
+	
+	// pluck
+	function pluck(array, prop) {
+		return map(array, function (item) {
+			return item[prop];
+		});
+	}
+	
+	// compact
+	function compact(array) {
+		var ret = [];
+		
+		each(array, function (item) {
+			if (item) { ret.push(item); }
+		});
+		
+		return ret;
+	}
+	
+	// unique
+	function unique(array) {
+		var ret = [];
+		
+		each(array, function (_a) {
+			if (!find(ret, _a)) { ret.push(_a); }
+		});
+		
+		return ret;
+	}
+	
+	// intersection
+	function intersection(a, b) {
+		var ret = [];
+		
+		each(a, function (_a) {
+			each(b, function (_b) {
+				if (_a === _b) { ret.push(_a); }
+			});
+		});
+		
+		return unique(ret);
+	}
+	
+	// rest
+	function rest(array, callback) {
+		var ret = [];
+		
+		each(array, function (item, index) {
+			if (!callback(item)) {
+				ret = array.slice(index);
+				return false;
+			}
+		});
+		
+		return ret;
+	}
+
+	// initial
+	function initial(array, callback) {
+		var reversed = array.slice().reverse();
+		
+		return rest(reversed, callback).reverse();
+	}
+	
+	// extend
+	function extend(a, b) {
+		for (var key in b) {
+			if (b.hasOwnProperty(key)) { a[key] = b[key]; }
+		}
+		
+		return a;
+	}
+			
+	// define internal moment reference
+	var moment;
+
+	if (typeof require === "function") {
+		try { moment = require('moment'); } 
+		catch (e) {}
+	} 
+	
+	if (!moment && root.moment) {
+		moment = root.moment;
+	}
+	
+	if (!moment) {
+		throw "Moment Duration Format cannot find Moment.js";
+	}
+	
+	// moment.duration.format([template] [, precision] [, settings])
+	moment.duration.fn.format = function () {
+
+		var tokenizer, tokens, types, typeMap, momentTypes, foundFirst, trimIndex,
+			args = [].slice.call(arguments),
+			settings = extend({}, this.format.defaults),
+			// keep a shadow copy of this moment for calculating remainders
+			remainder = moment.duration(this);
+
+		// add a reference to this duration object to the settings for use
+		// in a template function
+		settings.duration = this;
+
+		// parse arguments
+		each(args, function (arg) {
+			if (typeof arg === "string" || typeof arg === "function") {
+				settings.template = arg;
+				return;
+			}
+
+			if (typeof arg === "number") {
+				settings.precision = arg;
+				return;
+			}
+
+			if (isObject(arg)) {
+				extend(settings, arg);
+			}
+		});
+
+		// types
+		types = settings.types = (isArray(settings.types) ? settings.types : settings.types.split(" "));
+
+		// template
+		if (typeof settings.template === "function") {
+			settings.template = settings.template.apply(settings);
+		}
+
+		// tokenizer regexp
+		tokenizer = new RegExp(map(types, function (type) {
+			return settings[type].source;
+		}).join("|"), "g");
+
+		// token type map function
+		typeMap = function (token) {
+			return find(types, function (type) {
+				return settings[type].test(token);
+			});
+		};
+
+		// tokens array
+		tokens = map(settings.template.match(tokenizer), function (token, index) {
+			var type = typeMap(token),
+				length = token.length;
+
+			return {
+				index: index,
+				length: length,
+
+				// replace escaped tokens with the non-escaped token text
+				token: (type === "escape" ? token.replace(settings.escape, "$1") : token),
+
+				// ignore type on non-moment tokens
+				type: ((type === "escape" || type === "general") ? null : type)
+
+				// calculate base value for all moment tokens
+				//baseValue: ((type === "escape" || type === "general") ? null : this.as(type))
+			};
+		}, this);
+
+		// unique moment token types in the template (in order of descending magnitude)
+		momentTypes = intersection(types, unique(compact(pluck(tokens, "type"))));
+
+		// exit early if there are no momentTypes
+		if (!momentTypes.length) {
+			return pluck(tokens, "token").join("");
+		}
+
+		// calculate values for each token type in the template
+		each(momentTypes, function (momentType, index) {
+			var value, wholeValue, decimalValue, isLeast, isMost;
+
+			// calculate integer and decimal value portions
+			value = remainder.as(momentType);
+			wholeValue = (value > 0 ? Math.floor(value) : Math.ceil(value));
+			decimalValue = value - wholeValue;
+
+			// is this the least-significant moment token found?
+			isLeast = ((index + 1) === momentTypes.length);
+
+			// is this the most-significant moment token found?
+			isMost = (!index);
+
+			// update tokens array
+			// using this algorithm to not assume anything about
+			// the order or frequency of any tokens
+			each(tokens, function (token) {
+				if (token.type === momentType) {
+					extend(token, {
+						value: value,
+						wholeValue: wholeValue,
+						decimalValue: decimalValue,
+						isLeast: isLeast,
+						isMost: isMost
+					});
+
+					if (isMost) {
+						// note the length of the most-significant moment token:
+						// if it is greater than one and forceLength is not set, default forceLength to `true`
+						if (settings.forceLength == null && token.length > 1) {
+							settings.forceLength = true;
+						}
+
+						// rationale is this:
+						// if the template is "h:mm:ss" and the moment value is 5 minutes, the user-friendly output is "5:00", not "05:00"
+						// shouldn't pad the `minutes` token even though it has length of two
+						// if the template is "hh:mm:ss", the user clearly wanted everything padded so we should output "05:00"
+						// if the user wanted the full padded output, they can set `{ trim: false }` to get "00:05:00"
+					}
+				}
+			});
+
+			// update remainder
+			remainder.subtract(wholeValue, momentType);
+		});
+	
+		// trim tokens array
+		if (settings.trim) {
+			tokens = (settings.trim === "left" ? rest : initial)(tokens, function (token) {
+				// return `true` if:
+				// the token is not the least moment token (don't trim the least moment token)
+				// the token is a moment token that does not have a value (don't trim moment tokens that have a whole value)
+				return !(token.isLeast || (token.type != null && token.wholeValue));
+			});
+		}
+		
+		
+		// build output
+
+		// the first moment token can have special handling
+		foundFirst = false;
+
+		// run the map in reverse order if trimming from the right
+		if (settings.trim === "right") {
+			tokens.reverse();
+		}
+
+		tokens = map(tokens, function (token) {
+			var val,
+				decVal;
+
+			if (!token.type) {
+				// if it is not a moment token, use the token as its own value
+				return token.token;
+			}
+
+			// apply negative precision formatting to the least-significant moment token
+			if (token.isLeast && (settings.precision < 0)) {
+				val = (Math.floor(token.wholeValue * Math.pow(10, settings.precision)) * Math.pow(10, -settings.precision)).toString();
+			} else {
+				val = token.wholeValue.toString();
+			}
+			
+			// remove negative sign from the beginning
+			val = val.replace(/^\-/, "");
+
+			// apply token length formatting
+			// special handling for the first moment token that is not the most significant in a trimmed template
+			if (token.length > 1 && (foundFirst || token.isMost || settings.forceLength)) {
+				val = padZero(val, token.length);
+			}
+
+			// add decimal value if precision > 0
+			if (token.isLeast && (settings.precision > 0)) {
+				decVal = token.decimalValue.toString().replace(/^\-/, "").split(/\.|e\-/);
+				switch (decVal.length) {
+					case 1:
+						val += "." + padZero(decVal[0], settings.precision, true).slice(0, settings.precision);
+						break;
+						
+					case 2:
+						val += "." + padZero(decVal[1], settings.precision, true).slice(0, settings.precision);		
+						break;
+						
+					case 3:
+						val += "." + padZero(repeatZero((+decVal[2]) - 1) + (decVal[0] || "0") + decVal[1], settings.precision, true).slice(0, settings.precision);		
+						break;
+					
+					default:
+						throw "Moment Duration Format: unable to parse token decimal value.";
+				}
+			}
+			
+			// add a negative sign if the value is negative and token is most significant
+			if (token.isMost && token.value < 0) {
+				val = "-" + val;
+			}
+
+			foundFirst = true;
+
+			return val;
+		});
+
+		// undo the reverse if trimming from the right
+		if (settings.trim === "right") {
+			tokens.reverse();
+		}
+
+		return tokens.join("");
+	};
+
+	moment.duration.fn.format.defaults = {
+		// token definitions
+		escape: /\[(.+?)\]/,
+		years: /[Yy]+/,
+		months: /M+/,
+		weeks: /[Ww]+/,
+		days: /[Dd]+/,
+		hours: /[Hh]+/,
+		minutes: /m+/,
+		seconds: /s+/,
+		milliseconds: /S+/,
+		general: /.+?/,
+
+		// token type names
+		// in order of descending magnitude
+		// can be a space-separated token name list or an array of token names
+		types: "escape years months weeks days hours minutes seconds milliseconds general",
+
+		// format options
+
+		// trim
+		// "left" - template tokens are trimmed from the left until the first moment token that has a value >= 1
+		// "right" - template tokens are trimmed from the right until the first moment token that has a value >= 1
+		// (the final moment token is not trimmed, regardless of value)
+		// `false` - template tokens are not trimmed
+		trim: "left",
+
+		// precision
+		// number of decimal digits to include after (to the right of) the decimal point (positive integer)
+		// or the number of digits to truncate to 0 before (to the left of) the decimal point (negative integer)
+		precision: 0,
+
+		// force first moment token with a value to render at full length even when template is trimmed and first moment token has length of 1
+		forceLength: null,
+
+		// template used to format duration
+		// may be a function or a string
+		// template functions are executed with the `this` binding of the settings object
+		// so that template strings may be dynamically generated based on the duration object
+		// (accessible via `this.duration`)
+		// or any of the other settings
+		template: function () {
+			var types = this.types,
+				dur = this.duration,
+				lastType = findLast(types, function (type) {
+					return dur._data[type];
+				});
+
+			// default template strings for each duration dimension type
+			switch (lastType) {
+				case "seconds":
+					return "h:mm:ss";
+				case "minutes":
+					return "d[d] h:mm";
+				case "hours":
+					return "d[d] h[h]";
+				case "days":
+					return "M[m] d[d]";
+				case "weeks":
+					return "y[y] w[w]";
+				case "months":
+					return "y[y] M[m]";
+				case "years":
+					return "y[y]";
+				default:
+					return "y[y] M[m] d[d] h:mm:ss";
+			}
+		}
+	};
+
+})(this);
+
+},{"moment":6}],6:[function(require,module,exports){
 //! moment.js
 //! version : 2.17.1
 //! authors : Tim Wood, Iskren Chernev, Moment.js contributors
@@ -4299,3 +5119,5 @@ hooks.prototype             = proto;
 return hooks;
 
 })));
+
+},{}]},{},[3]);

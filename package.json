@@ -4,12 +4,16 @@
   "description": "Gets, transforms, and renders the wait times for a specific rmv branch.",
   "main": "main.js",
   "dependencies": {
-    "chai": "^3.5.0",
     "moment": "^2.17.1",
     "moment-duration-format": "^1.3.0"
-    "requirejs": "^2.3.2"
+  },
+  "devDependencies": {
+    "chai": "^3.5.0",
+    "browserify": "^13.3.0",
+    "mocha": "^3.2.0"
   },
   "scripts": {
+    "build-js": "browserify ./app/js/main.js > ./dist/js/bundle.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {

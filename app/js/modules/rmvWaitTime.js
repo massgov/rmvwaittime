@@ -1,57 +1,26 @@
-/**
- * @file
- * RMV Wait Time Component Script
- * Gets, transforms, and renders the wait times for a specific rmv branch.
- * See ticket: https://jira.state.ma.us/browse/DP-822
- */
+// Helpers
+var dateTime = require("../helpers/dateTime.js");
+var urlParser = require("../helpers/urlParser.js");
+
+// Libraries
+var moment = require("moment");
+require("moment-duration-format");
 
 /**
- * ES6 shims
- */
-
-// String.startsWith()
-// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/startsWith
-if (!String.prototype.startsWith) {
-  String.prototype.startsWith = function(searchString, position){
-    position = position || 0;
-    return this.substr(position, searchString.length) === searchString;
-  };
-}
-
-/**
- * Main Wait Time component script.
- */
-(function(){
-  'use strict';
+* @function
+* RMV Wait Time module
+* Gets, transforms, and renders the wait times for a specific rmv branch.
+* See ticket: https://jira.state.ma.us/browse/DP-822
+*/
+module.exports = function($) {
+  "use strict";
 
   // Cache the wait time container selector.
   var el = $('.ma__wait-time');
 
-  // Cache the API URL.
+  // The API URL.
   // var rmvWaitTimeURL = 'https://www.massdot.state.ma.us/feeds/qmaticxml/qmaticXML.aspx';
-  var rmvWaitTimeURL = 'waittime.xml'; // local stub
-
-  // @todo Get branch css path iframe src URL (passed by drupal content authors) -- url parser helper in Mayflower
-  // @todo Get branch js path iframe src URL (passed by drupal content authors) -- url parser helper in Mayflower
-
-  /**
-   * Get the current time to show when latest wait times were updated.
-   * @function
-   * @returns {String.} String of the current time (5:48 PM).
-   * @todo move this functionality into a mayflower helper?
-   */
-  var getCurrentTime = function() {
-    var now = new Date(),
-      hours = now.getHours(),
-      minutes = now.getMinutes();
-
-    var ampm = hours >= 12 ? 'pm' : 'am';
-    hours = hours % 12;
-    hours = hours ? hours : 12; // the hour '0' should be '12'
-    minutes = minutes < 10 ? '0' + minutes : minutes;
-
-    return hours + ':' + minutes + ampm;
-  };
+  var rmvWaitTimeURL = '/data/waittime.xml'; // local stub
 
   /**
    * Render the transformed wait times for the requested branch on the page.
@@ -66,27 +35,8 @@ if (!String.prototype.startsWith) {
     $registration.text(data.processedRegistration);
 
     var $timestamp = $('span[data-variable="timestamp"]');
-    var time = getCurrentTime();
+    var time = dateTime.getCurrentTime();
     $timestamp.text(time);
-  };
-
-  /**
-   * Parse the URL querystring parameters.
-   * @function
-   * @returns {Array.} Array of the querystring parameter keys.
-   * @todo move this functionality into a mayflower helper
-   */
-  var parseParamsFromUrl = function () {
-    var params = {};
-    var parts = window.location.search.substr(1).split('&');
-    for (var i = 0; i < parts.length; i++) {
-      var keyValuePair = parts[i].split('=');
-      var key = decodeURIComponent(keyValuePair[0]);
-      params[key] = keyValuePair[1] ?
-        decodeURIComponent(keyValuePair[1].replace(/\+/g, ' ')) :
-        keyValuePair[1];
-    }
-    return params;
   };
 
   /**
@@ -94,8 +44,8 @@ if (!String.prototype.startsWith) {
    * @function
    * @returns {String.} The name of the town passed to the script.
    */
-  function getLocation() {
-    var urlParams = parseParamsFromUrl();
+  var getLocation = function() {
+    var urlParams = urlParser.parseParamsFromUrl();
 
     // Define param for the branch town query.
     var branchParamName = 'town';
@@ -106,7 +56,7 @@ if (!String.prototype.startsWith) {
     else {
       throw new Error("No town parameter passed.");
     }
-  }
+  };
 
   /**
    * Transform the wait time raw strings into processed wait time strings according to ticket spec.
@@ -125,7 +75,7 @@ if (!String.prototype.startsWith) {
    * < 1 hour: round to the minute
    * > 1 hour: round to the quarter hour
    */
-  function transformTime(waitTime) {
+  var transformTime = function(waitTime) {
     // Default to unavailable.
     var displayTime = 'Estimation unavailable';
 
@@ -134,18 +84,20 @@ if (!String.prototype.startsWith) {
       displayTime = 'Closed';
       return displayTime;
     }
+
     // 0 = 'No wait time'.
     if (waitTime == '00:00:00') {
       displayTime = 'No wait time';
       return displayTime;
     }
+
     // < 1 minute = 'Less than a minute'.
     if (waitTime.startsWith('00:00:')) {
       displayTime = 'Less than a minute';
       return displayTime;
     }
 
-    // Everything Else.
+    // Everything else: format the time string.
 
     // Create a moment duration with the waitTime string.
     var m = moment.duration(waitTime);
@@ -195,7 +147,7 @@ if (!String.prototype.startsWith) {
     displayTime = m.format({ template: template});
 
     return displayTime;
-  }
+  };
 
   /**
    * Pass the wait time raw strings into function to transform wait time strings according to ticket spec.
@@ -204,7 +156,7 @@ if (!String.prototype.startsWith) {
    * @returns {Object.} An object of the requested branch with additional processed wait time stings for 'licensing'
    * and 'registration'.
    */
-  function processWaitTimes(branch) {
+  var processWaitTimes = function(branch) {
 
     // Pass each wait time string (licensing + registration) through transform function.
     branch.processedLicensing = transformTime(branch.licensing);
@@ -212,7 +164,7 @@ if (!String.prototype.startsWith) {
 
     console.log(branch);
     return branch;
-  }
+  };
 
   /**
    * Extract the specific branch wait times from xml feed.
@@ -220,7 +172,7 @@ if (!String.prototype.startsWith) {
    * @param {xml} xml feed of rmv <branches> wait time data.
    * @returns {Object.} An object of the requested branch wait time stings for 'licensing' and 'registration'.
    */
-  function getBranch(xml) {
+  var getBranch = function(xml) {
     try {
       var location = getLocation();
     }
@@ -239,14 +191,14 @@ if (!String.prototype.startsWith) {
       }
       throw new Error('Could not find wait time information for provided location.');
     }
-  }
+  };
 
   /**
    * Get the rmv wait times for a specific branch.
    * @function
    * @returns {Promise.} A promise which contains only the requested branch's wait times on success.
    */
-  function getBranchData() {
+  var getBranchData = function() {
     var promise = $.Deferred(); // promise returned by function
 
     $.ajax({ // ajax() returns a promise
@@ -255,21 +207,21 @@ if (!String.prototype.startsWith) {
       cache: false,
       dataType: 'xml'
     })
-      .done(function(data){
-        try {
-          var branch = getBranch(data); // Only send the data for the branch that we need.
-        }
-        catch (e) {
-          console.log(e);
-        }
-        if (branch) {
-          promise.resolve(branch);
-        }
+    .done(function(data){
+      try {
+        var branch = getBranch(data); // Only send the data for the branch that we need.
+      }
+      catch (e) {
+        console.log(e);
+      }
+      if (branch) {
+        promise.resolve(branch);
+      }
 
-        promise.reject();
+      promise.reject();
     })
-      .fail(function(){
-        promise.reject();
+    .fail(function(){
+      promise.reject();
     });
 
     return promise;
@@ -279,16 +231,16 @@ if (!String.prototype.startsWith) {
    * Gets, transforms, and renders the wait times for a specific rmv branch.
    * @function
    */
-  function updateTimes() {
+  var updateTimes = function() {
     // get the branch data
     getBranchData()
       .done(function(branchData){
-      // transform data
-      var branchDisplayData = processWaitTimes(branchData);
-      // render information
-      render(branchDisplayData);
-      el.removeClass('visually-hidden');
-    })
+        // transform data
+        var branchDisplayData = processWaitTimes(branchData);
+        // render information
+        render(branchDisplayData);
+        el.removeClass('visually-hidden');
+      })
       .fail(function(){
         render({
           processedLicensing: 'Estimation unavailable',
@@ -297,11 +249,23 @@ if (!String.prototype.startsWith) {
         el.removeClass('visually-hidden');
 
         // Do not try to keep running
-        clearInterval(waitTimeRefresh);
-        // console.info('Script will not refresh.')
+        stopWaitTimeRefresh();
       });
+  };
+
+  // Define setInterval reference variable inside module so we can clear it from within.
+  var refreshTimer = null;
+
+  var waitTimeRefresh = function() {
+    refreshTimer = setInterval(this.updateTimes, 60000);
+  };
+
+  var stopWaitTimeRefresh = function() {
+    clearInterval(refreshTimer);
+  };
+
+  return {
+    updateTimes: updateTimes,
+    waitTimeRefresh: waitTimeRefresh
   }
-  // Update the wait times once then set interval to update again every minute.
-  updateTimes();
-  var waitTimeRefresh = setInterval(updateTimes, 60000);
-})();
+}(jQuery);
