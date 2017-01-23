@@ -15,8 +15,7 @@ require("moment-duration-format");
 module.exports = function($) {
   "use strict";
 
-  // Cache the wait time container selector.
-  var el = $('.ma__wait-time');
+  var $el = $('.ma__wait-time');
 
   // The API URL.
   // var rmvWaitTimeURL = 'https://www.massdot.state.ma.us/feeds/qmaticxml/qmaticXML.aspx';
@@ -28,25 +27,42 @@ module.exports = function($) {
    * @param {Object} data branch display data with processed wait times.
    */
   var render = function(data) {
-    var $licensing = $('span[data-variable="licensing"]');
-    $licensing.text(data.processedLicensing);
+    var $licensing = $el.find('span[data-variable="licensing"]');
+    if ($licensing.length) {
+      $licensing.text(data.processedLicensing);
+    }
+    // else {
+    //   throw new Error("Can not find licensing wait time DOM element.");
+    // }
 
-    var $registration = $('span[data-variable="registration"]');
-    $registration.text(data.processedRegistration);
+    var $registration = $el.find('span[data-variable="registration"]');
+    if ($registration.length) {
+      $registration.text(data.processedRegistration);
+    }
+    // else {
+    //   throw new Error("Can not find registration wait time DOM element.");
+    // }
 
-    var $timestamp = $('span[data-variable="timestamp"]');
     var time = dateTime.getCurrentTime();
-    $timestamp.text(time);
+    var $timestamp = $el.find('span[data-variable="timestamp"]');
+    if ($timestamp.length) {
+      $timestamp.text(time);
+    }
+    // else {
+    //   throw new Error("Can not find timestamp wait time DOM element.");
+    // }
+
   };
 
   /**
    * Get branch town value.
    * @function
-   * @returns {String.} The name of the town passed to the script.
+   * @param {Array} urlParams is an associative array of url parameters,
+       returned from urlParser.parseParamsFromUrl().
+   * @returns {String} The name of the town passed to the script.
+   * @throws Error when 'town' is not found in the array of parameters.
    */
-  var getLocation = function() {
-    var urlParams = urlParser.parseParamsFromUrl();
-
+  var getLocationFromURL = function(urlParams) {
     // Define param for the branch town query.
     var branchParamName = 'town';
 
@@ -62,18 +78,18 @@ module.exports = function($) {
    * Transform the wait time raw strings into processed wait time strings according to ticket spec.
    * @function
    * @param {String} waitTime is the raw wait time for either the branch licensing or registration.
-   * @returns {String.} A transformed wait time duration in human readable format.
+   * @returns {String} A transformed wait time duration in human readable format.
    *
    * Specs from ticket (see link at top of file):
    * Closed = Closed
    * 00:00:00 = No wait time
    * < 1 minute = Less than a minute
-   * if hours == 1 ... string += 1 hour
-   * if hours > 1 string += [0] hours
-   *  >> if [1], string += [1] round up to quarter hour minutes when not = 0
-   * singular minute/hour for 1, plural for +1 (no abbreviations)
-   * < 1 hour: round to the minute
-   * > 1 hour: round to the quarter hour
+   * if hour == 1 ... string = 1 hour ...
+   * if hours > 1 ... string += * hours ...
+   * if minute == 1 ... string = ... 1 minute
+   * if minutes > 1 ... string += ... * minutes
+   *  >> round minutes up to quarter hour minutes when minutes not = 0
+   * if < 1 hour: round up to the minute
    */
   var transformTime = function(waitTime) {
     // Default to unavailable.
@@ -153,7 +169,7 @@ module.exports = function($) {
    * Pass the wait time raw strings into function to transform wait time strings according to ticket spec.
    * @function
    * @param {Object} branch contains wait time strings for licensing and registration.
-   * @returns {Object.} An object of the requested branch with additional processed wait time stings for 'licensing'
+   * @returns {Object} An object of the requested branch with additional processed wait time stings for 'licensing'
    * and 'registration'.
    */
   var processWaitTimes = function(branch) {
@@ -170,11 +186,14 @@ module.exports = function($) {
    * Extract the specific branch wait times from xml feed.
    * @function
    * @param {xml} xml feed of rmv <branches> wait time data.
-   * @returns {Object.} An object of the requested branch wait time stings for 'licensing' and 'registration'.
+   * @returns {Object} An object of the requested branch wait time stings for 'licensing'
+        and 'registration'.
+   * @throws Error when we can't find the branch corresponding to the passed town in the data feed.
    */
   var getBranch = function(xml) {
+    var urlParams = urlParser.parseParamsFromUrl();
     try {
-      var location = getLocation();
+      var location = getLocationFromURL(urlParams);
     }
     catch(e) {
       console.log(e);
@@ -196,7 +215,7 @@ module.exports = function($) {
   /**
    * Get the rmv wait times for a specific branch.
    * @function
-   * @returns {Promise.} A promise which contains only the requested branch's wait times on success.
+   * @returns {Promise} A promise which contains only the requested branch's wait times on success.
    */
   var getBranchData = function() {
     var promise = $.Deferred(); // promise returned by function
@@ -239,14 +258,14 @@ module.exports = function($) {
         var branchDisplayData = processWaitTimes(branchData);
         // render information
         render(branchDisplayData);
-        el.removeClass('visually-hidden');
+        $el.removeClass('visually-hidden');
       })
       .fail(function(){
         render({
           processedLicensing: 'Estimation unavailable',
           processedRegistration: 'Estimation unavailable'
         });
-        el.removeClass('visually-hidden');
+        $el.removeClass('visually-hidden');
 
         // Do not try to keep running
         stopWaitTimeRefresh();
@@ -266,6 +285,7 @@ module.exports = function($) {
 
   return {
     updateTimes: updateTimes,
-    waitTimeRefresh: waitTimeRefresh
+    waitTimeRefresh: waitTimeRefresh/** begin test code**/,
+    transformTime: transformTime/** end test code **/
   }
 }(jQuery);
