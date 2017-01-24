@@ -2,9 +2,8 @@
  * Get the current time to show when latest wait times were updated.
  * @function
  * @returns {String.} String of the current time (5:48 PM).
- * @todo move this functionality into a mayflower helper?
  */
- 
+
 module.exports = {
   getCurrentTime: function() {
     var now = new Date(),

@@ -3,9 +3,8 @@
  * Get the current time to show when latest wait times were updated.
  * @function
  * @returns {String.} String of the current time (5:48 PM).
- * @todo move this functionality into a mayflower helper?
  */
- 
+
 module.exports = {
   getCurrentTime: function() {
     var now = new Date(),
@@ -22,6 +21,21 @@ module.exports = {
 };
 
 },{}],2:[function(require,module,exports){
+/**
+ * Title Case a Sentence With the map() Method.
+ * @function
+ * @returns {String.} String to be converted to Title Case.
+ */
+
+module.exports = {
+  titleCase: function(str) {
+    return str.toLowerCase().split(' ').map(function(word) {
+      return (word.charAt(0).toUpperCase() + word.slice(1));
+    }).join(' ');
+  }
+};
+
+},{}],3:[function(require,module,exports){
 /**
  * Parse the URL querystring parameters.
  * @function
@@ -43,7 +57,7 @@ module.exports = {
   }
 };
 
-},{}],3:[function(require,module,exports){
+},{}],4:[function(require,module,exports){
 (function(window, document){
   "use strict";
 
@@ -55,10 +69,11 @@ module.exports = {
   
 })(window, document);
 
-},{"./modules/rmvWaitTime.js":4}],4:[function(require,module,exports){
+},{"./modules/rmvWaitTime.js":5}],5:[function(require,module,exports){
 // Helpers
 var dateTime = require("../helpers/dateTime.js");
 var urlParser = require("../helpers/urlParser.js");
+var stringConversions = require("../helpers/stringConversions.js");
 
 // Libraries
 var moment = require("moment");
@@ -265,8 +280,9 @@ module.exports = function($) {
     }
 
     if (location) {
+      var locationTitleCased = stringConversions.titleCase(location);
       var $branch = $(xml).find('branch').filter(function () {
-        return $(this).find('town').text() == location;
+        return $(this).find('town').text() == locationTitleCased;
       });
 
       if ($branch.length) {
@@ -364,11 +380,12 @@ module.exports = function($) {
     updateTimes: updateTimes,
     waitTimeRefresh: waitTimeRefresh/** begin test code**/,
     transformTime: transformTime,
-    getLocationFromURL: getLocationFromURL/** end test code **/
+    getLocationFromURL: getLocationFromURL,
+    render:render/** end test code **/
   }
 }(jQuery);
 
-},{"../helpers/dateTime.js":1,"../helpers/urlParser.js":2,"moment":6,"moment-duration-format":5}],5:[function(require,module,exports){
+},{"../helpers/dateTime.js":1,"../helpers/stringConversions.js":2,"../helpers/urlParser.js":3,"moment":7,"moment-duration-format":6}],6:[function(require,module,exports){
 /*! Moment Duration Format v1.3.0
  *  https://github.com/jsmreese/moment-duration-format 
  *  Date: 2014-07-15
@@ -852,7 +869,7 @@ module.exports = function($) {
 
 })(this);
 
-},{"moment":6}],6:[function(require,module,exports){
+},{"moment":7}],7:[function(require,module,exports){
 //! moment.js
 //! version : 2.17.1
 //! authors : Tim Wood, Iskren Chernev, Moment.js contributors
@@ -5155,4 +5172,4 @@ return hooks;
 
 })));
 
-},{}]},{},[3]);
+},{}]},{},[4]);

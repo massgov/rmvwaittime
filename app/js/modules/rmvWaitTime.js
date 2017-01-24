@@ -1,6 +1,7 @@
 // Helpers
 var dateTime = require("../helpers/dateTime.js");
 var urlParser = require("../helpers/urlParser.js");
+var stringConversions = require("../helpers/stringConversions.js");
 
 // Libraries
 var moment = require("moment");
@@ -207,8 +208,9 @@ module.exports = function($) {
     }
 
     if (location) {
+      var locationTitleCased = stringConversions.titleCase(location);
       var $branch = $(xml).find('branch').filter(function () {
-        return $(this).find('town').text() == location;
+        return $(this).find('town').text() == locationTitleCased;
       });
 
       if ($branch.length) {
