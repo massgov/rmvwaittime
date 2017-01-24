@@ -93,7 +93,7 @@ module.exports = function($) {
    */
   var transformTime = function(waitTime) {
     // Default to unavailable.
-    var displayTime = 'Estimation unavailable';
+    var displayTime = 'Wait time unavailable';
 
     // Closed = 'Closed'.
     if (waitTime == 'Closed') {
@@ -262,8 +262,8 @@ module.exports = function($) {
       })
       .fail(function(){
         render({
-          processedLicensing: 'Estimation unavailable',
-          processedRegistration: 'Estimation unavailable'
+          processedLicensing: 'Wait time unavailable',
+          processedRegistration: 'Wait time unavailable'
         });
         $el.removeClass('visually-hidden');
 
