@@ -49,13 +49,6 @@ describe('#transformTime()', function() {
     expect(actual).to.eql(expected);
   });
 
-  it('should contain "hour" when "01:**:**" is passed', function() {
-    // 1 hour ... should contain 'hour'
-    var input = '01:15:30';
-    var actual = rmvWaitTime.transformTime(input);
-    expect(actual).to.contain('hour');
-  });
-
   it('should not contain "hours" when "01:**:**" is passed', function() {
     // 1 hour ... should not contain 'hours'
     var input = '01:15:30';
@@ -70,23 +63,9 @@ describe('#transformTime()', function() {
     expect(actual).to.contain('hours');
   });
 
-  it('should not contain "hour" when "02:**:**" is passed', function() {
-    // 1 hour ... should not contain 'hours'
-    var input = '02:15:30';
-    var actual = rmvWaitTime.transformTime(input);
-    expect(actual).to.not.contain('hour');
-  });
-
-  it('should contain "minute" when "**:01:**" is passed', function() {
-    // ... 1 minute should contain 'minute'
-    var input = '01:01:10';
-    var actual = rmvWaitTime.transformTime(input);
-    expect(actual).to.contain('minute');
-  });
-
   it('should not contain "minutes" when "**:01:**" is passed', function() {
     // ... 1 minute should not contain 'minutes'
-    var input = '01:01:10';
+    var input = '00:01:05';
     var actual = rmvWaitTime.transformTime(input);
     expect(actual).to.not.contain('minutes');
   });
@@ -96,13 +75,6 @@ describe('#transformTime()', function() {
     var input = '00:02:10';
     var actual = rmvWaitTime.transformTime(input);
     expect(actual).to.contain('minutes');
-  });
-
-  it('should not contain "minute" when "**:02:**" is passed', function() {
-    // ... 1 minute should not contain 'minutes'
-    var input = '01:02:10';
-    var actual = rmvWaitTime.transformTime(input);
-    expect(actual).to.not.contain('minute');
   });
 
   it('should round up to nearest 15 minutes when "01:01:45" is passed', function() {
