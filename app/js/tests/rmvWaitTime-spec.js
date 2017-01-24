@@ -1,7 +1,8 @@
 'use strict';
 var chai = require('chai'),
     expect = chai.expect,
-    should = chai.should(),
+    should = chai.should,
+    assert = chai.assert,
     jsdom = require('jsdom').jsdom,
     document = jsdom('<html class="pl no-js" lang="en"><head></head><body class="" style="overflow-x: hidden !important;"><section class="ma__wait-time visually-hidden"> <h2 class="ma__wait-time__title"> <svg focusable="false" role="presentation" class="svg-wait-time"> <use xlink:href="assets/images/svg-sprite.svg#wait-time"></use> </svg> <span>Wait Time</span> </h2> <ul class="ma__wait-time__items"> <li class="ma__wait-time__item"> <div class="ma__wait-time__label">Licensing:</div><div class="ma__wait-time__value"> <span class="ma__wait-time__time" data-variable="licensing"></span> </div></li><li class="ma__wait-time__item"> <div class="ma__wait-time__label">Registration:</div><div class="ma__wait-time__value"> <span class="ma__wait-time__time" data-variable="registration"></span> </div></li></ul> <span class="ma__wait-time__refreshed">Updated at <span data-variable="timestamp"></span></span> </section></body></html>'),
     window = document.defaultView;
@@ -124,7 +125,7 @@ describe('#getLocationFromURL()', function() {
 
   var rmvWaitTime = require('../modules/rmvWaitTime.js');
 
-  it('should return "Natick" when "[town=>\'Natick\'] (IE /?town=Natick)" is passed.', function() {
+  it('should return "Natick" when "{town:\'Natick\'} (IE /?town=Natick)" is passed.', function() {
     var input = {town:'Natick'};
     var actual = rmvWaitTime.getLocationFromURL(input);
     var expected = 'Natick';
@@ -132,7 +133,11 @@ describe('#getLocationFromURL()', function() {
   });
 
   it('should throw error when no town argument (IE /) is passed', function() {
-    var input = {town: 'Natick'};
-    expect(rmvWaitTime.getLocationFromURL('blah')).to.throw("No town parameter passed.");
+    var input = '';
+    // assert.throw(rmvWaitTime.getLocationFromURL(input), Error, "No town parameter passed.");
+    // Pass expect a function that will get called, not the result of calling it
+
+    expect(rmvWaitTime.getLocationFromURL.bind(rmvWaitTime.getLocationFromURL, input)).to.throw("No town parameter passed.");
+
   });
 });

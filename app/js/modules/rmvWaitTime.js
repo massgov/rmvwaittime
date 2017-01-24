@@ -286,6 +286,7 @@ module.exports = function($) {
   return {
     updateTimes: updateTimes,
     waitTimeRefresh: waitTimeRefresh/** begin test code**/,
-    transformTime: transformTime/** end test code **/
+    transformTime: transformTime,
+    getLocationFromURL: getLocationFromURL/** end test code **/
   }
 }(jQuery);
