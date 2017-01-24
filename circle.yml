@@ -1,0 +1,16 @@
+machine:
+
+general:
+  test_dir: app/js/tests
+
+dependencies:
+  override:
+    - npm install
+
+build:
+  override:
+    - npm run build-js
+
+test:
+  override:
+    - npm run test-js
