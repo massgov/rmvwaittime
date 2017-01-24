@@ -2,10 +2,6 @@ dependencies:
   override:
     - npm install
 
-build:
-  override:
-    - npm run build-js
-
 test:
   override:
     - npm run test-js
