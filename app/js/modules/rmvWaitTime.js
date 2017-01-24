@@ -306,6 +306,7 @@ module.exports = function($) {
     updateTimes: updateTimes,
     waitTimeRefresh: waitTimeRefresh/** begin test code**/,
     transformTime: transformTime,
-    getLocationFromURL: getLocationFromURL/** end test code **/
+    getLocationFromURL: getLocationFromURL,
+    render:render/** end test code **/
   }
 }(jQuery);

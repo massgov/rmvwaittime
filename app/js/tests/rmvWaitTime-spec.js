@@ -18,7 +18,7 @@ describe('rmvWaitTime', function() {
   });
 });
 
-// rmvWaitTime should transform raw time string
+// rmvWaitTime should transform raw time string according to spec
 describe('#transformTime()', function() {
   // create some jsdom magic to allow jQuery to work
   var $ = global.jQuery = require('../../../assets/js/vendor/bower_components/jquery/dist/jquery.js')(window);
@@ -119,6 +119,7 @@ describe('#transformTime()', function() {
   });
 });
 
+// Make sure we can get the branch location from the URL
 describe('#getLocationFromURL()', function() {
   // create some jsdom magic to allow jQuery to work
   var $ = global.jQuery = require('../../../assets/js/vendor/bower_components/jquery/dist/jquery.js')(window);
@@ -139,5 +140,24 @@ describe('#getLocationFromURL()', function() {
 
     expect(rmvWaitTime.getLocationFromURL.bind(rmvWaitTime.getLocationFromURL, input)).to.throw("No town parameter passed.");
 
+  });
+});
+
+// Make sure we can write to the component selectors
+describe('#render()', function() {
+  // create some jsdom magic to allow jQuery to work
+  var $ = global.jQuery = require('../../../assets/js/vendor/bower_components/jquery/dist/jquery.js')(window);
+
+  var rmvWaitTime = require('../modules/rmvWaitTime.js'),
+      $el = $('.ma__wait-time');
+
+  it('should populate widget when "{ processedLicensing: \'1 hour, 32 minutes\', processedRegistration: \'30 minutes\' }" is passed.', function() {
+    var input = {
+      processedLicensing: "1 hour, 32 minutes",
+      processedRegistration: "30 minutes"
+    };
+    var actual = rmvWaitTime.render(input);
+    expect($el.find('span[data-variable="licensing"]').text()).to.equal('1 hour, 32 minutes');
+    expect($el.find('span[data-variable="registration"]').text()).to.equal('30 minutes');
   });
 });
