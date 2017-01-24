@@ -256,11 +256,19 @@ module.exports = function($) {
     }
     catch(e) {
       console.log(e);
+      ga('send', {
+        hitType: 'event',
+        eventCategory: 'error',
+        eventAction: e.message,
+        eventLabel: window.location.href
+      });
     }
+
     if (location) {
       var $branch = $(xml).find('branch').filter(function () {
         return $(this).find('town').text() == location;
       });
+
       if ($branch.length) {
         return {
           "licensing": $branch.find('licensing').text(),
@@ -291,7 +299,14 @@ module.exports = function($) {
       }
       catch (e) {
         console.log(e);
+        ga('send', {
+          hitType: 'event',
+          eventCategory: 'error',
+          eventAction: e.message,
+          eventLabel: window.location.href
+        });
       }
+
       if (branch) {
         promise.resolve(branch);
       }
