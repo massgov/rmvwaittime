@@ -73,7 +73,8 @@ require("moment-duration-format");
 module.exports = function($) {
   "use strict";
 
-  var $el = $('.ma__wait-time');
+  var $el = $('.ma__wait-time'),
+  waitTimeUnavailableString = 'Wait time unavailable';
 
   // The API URL.
   // var rmvWaitTimeURL = 'https://www.massdot.state.ma.us/feeds/qmaticxml/qmaticXML.aspx';
@@ -151,7 +152,7 @@ module.exports = function($) {
    */
   var transformTime = function(waitTime) {
     // Default to unavailable.
-    var displayTime = 'Wait time unavailable';
+    var displayTime = waitTimeUnavailableString;
 
     // Closed = 'Closed'.
     if (waitTime == 'Closed') {
@@ -323,8 +324,8 @@ module.exports = function($) {
       })
       .fail(function(){
         render({
-          processedLicensing: 'Wait time unavailable',
-          processedRegistration: 'Wait time unavailable'
+          processedLicensing: waitTimeUnavailableString,
+          processedRegistration: waitTimeUnavailableString
         });
         $el.removeClass('visually-hidden');
 
