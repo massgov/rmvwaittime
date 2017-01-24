@@ -77,7 +77,7 @@ module.exports = function($) {
 
   // The API URL.
   // var rmvWaitTimeURL = 'https://www.massdot.state.ma.us/feeds/qmaticxml/qmaticXML.aspx';
-  var rmvWaitTimeURL = 'data/waittimes.xml'; // local stub
+  var rmvWaitTimeURL = 'data/waittime.xml'; // local stub
 
   /**
    * Render the transformed wait times for the requested branch on the page.
@@ -299,8 +299,8 @@ module.exports = function($) {
     })
     .fail(function(jqXHR, textStatus, errorThrown){
       // console.log(jqXHR.status, jqXHR.statusText, errorThrown);
-      var error = new Error(textStatus + ": " + errorThrown + ": " + jqXHR.responseText);
-      console.log(error);
+      // var error = new Error(textStatus + ": " + errorThrown + ": " + jqXHR.responseText);
+      // console.log(error);
       promise.reject();
     });
 
