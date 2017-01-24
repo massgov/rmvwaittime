@@ -77,7 +77,7 @@ module.exports = function($) {
 
   // The API URL.
   // var rmvWaitTimeURL = 'https://www.massdot.state.ma.us/feeds/qmaticxml/qmaticXML.aspx';
-  var rmvWaitTimeURL = 'data/waittime.xml'; // local stub
+  var rmvWaitTimeURL = 'data/waittimes.xml'; // local stub
 
   /**
    * Render the transformed wait times for the requested branch on the page.
@@ -151,7 +151,7 @@ module.exports = function($) {
    */
   var transformTime = function(waitTime) {
     // Default to unavailable.
-    var displayTime = 'Estimation unavailable';
+    var displayTime = 'Wait time unavailable';
 
     // Closed = 'Closed'.
     if (waitTime == 'Closed') {
@@ -297,7 +297,10 @@ module.exports = function($) {
 
       promise.reject();
     })
-    .fail(function(){
+    .fail(function(jqXHR, textStatus, errorThrown){
+      // console.log(jqXHR.status, jqXHR.statusText, errorThrown);
+      var error = new Error(textStatus + ": " + errorThrown + ": " + jqXHR.responseText);
+      console.log(error);
       promise.reject();
     });
 
@@ -320,8 +323,8 @@ module.exports = function($) {
       })
       .fail(function(){
         render({
-          processedLicensing: 'Estimation unavailable',
-          processedRegistration: 'Estimation unavailable'
+          processedLicensing: 'Wait time unavailable',
+          processedRegistration: 'Wait time unavailable'
         });
         $el.removeClass('visually-hidden');
 
@@ -344,7 +347,8 @@ module.exports = function($) {
   return {
     updateTimes: updateTimes,
     waitTimeRefresh: waitTimeRefresh/** begin test code**/,
-    transformTime: transformTime/** end test code **/
+    transformTime: transformTime,
+    getLocationFromURL: getLocationFromURL/** end test code **/
   }
 }(jQuery);
 

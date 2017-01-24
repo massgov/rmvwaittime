@@ -239,7 +239,10 @@ module.exports = function($) {
 
       promise.reject();
     })
-    .fail(function(){
+    .fail(function(jqXHR, textStatus, errorThrown){
+      // console.log(jqXHR.status, jqXHR.statusText, errorThrown);
+      // var error = new Error(textStatus + ": " + errorThrown + ": " + jqXHR.responseText);
+      // console.log(error);
       promise.reject();
     });
 
