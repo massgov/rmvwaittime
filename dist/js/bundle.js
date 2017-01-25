@@ -188,9 +188,23 @@ module.exports = function($) {
     }
 
     // Everything else: format the time string.
+    try {
+      // Create a moment duration with the waitTime string.
+      var m = moment.duration(waitTime);
+    }
+    catch(e) {
+      console.log(e);
+      // Send to google anayltics as error event if the API changes time string format
+      // in a way that moment.duration doesn't understand.
+      ga('send', {
+        hitType: 'event',
+        eventCategory: 'error',
+        eventAction: e.message,
+        eventLabel: window.location.href
+      });
 
-    // Create a moment duration with the waitTime string.
-    var m = moment.duration(waitTime);
+      return displayTime; // Wait time unavailable.
+    }
 
     // Declare moment formatter template partials.
     var hourTemplate = '',
@@ -271,7 +285,7 @@ module.exports = function($) {
     }
     catch(e) {
       console.log(e);
-      // send to google anayltics as error event if we don't have a location argument
+      // Send to google anayltics as error event if we don't have a location argument.
       ga('send', {
         hitType: 'event',
         eventCategory: 'error',
@@ -302,9 +316,9 @@ module.exports = function($) {
    * @returns {Promise} A promise which contains only the requested branch's wait times on success.
    */
   var getBranchData = function() {
-    var promise = $.Deferred(); // promise returned by function
+    var promise = $.Deferred();
 
-    $.ajax({ // ajax() returns a promise
+    $.ajax({
       type: 'GET',
       url: rmvWaitTimeURL,
       cache: false,
@@ -316,7 +330,7 @@ module.exports = function($) {
       }
       catch (e) {
         console.log(e);
-        // send to google anayltics as error event if we can't get the branch
+        // Send to google anayltics as error event if we can't get the branch.
         ga('send', {
           hitType: 'event',
           eventCategory: 'error',
@@ -332,14 +346,14 @@ module.exports = function($) {
       promise.reject();
     })
     .fail(function(jqXHR, textStatus, errorThrown){
-      // get + return ajax response Text (html), remove tags, empty items, format string
+      // Get + return ajax response Text (html), remove tags, empty items, format string.
       var responseString = jqXHR.responseText.replace(/(<([^>]+)>)/ig,""),
       responseArray = responseString.split('\n'),
       cleanResponseArray = responseArray.filter(function(entry) { return entry.trim() != ''; }),
       message = cleanResponseArray.join(": ");
       console.log(message);
 
-      // send to google anayltics as error event if we get ajax error
+      // Send to google anayltics as error event if we get ajax error.
       ga('send', {
         hitType: 'event',
         eventCategory: 'error',
