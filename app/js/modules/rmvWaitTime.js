@@ -17,8 +17,8 @@ module.exports = function($) {
   "use strict";
 
   var $el = $('.ma__wait-time'),
-  waitTimeUnavailableString = 'Wait time unavailable',
-  hasSucceeded = false; // flag to determine if we are on subsequent attempt to updateTimes
+  waitTimeUnavailableString = 'Wait time unavailable', // Used more than once.
+  hasSucceeded = false; // Flag to determine if we are on a subsequent attempt to updateTimes.
 
   // The API URL.
   // var rmvWaitTimeURL = 'https://www.massdot.state.ma.us/feeds/qmaticxml/qmaticXML.aspx';
@@ -377,11 +377,17 @@ module.exports = function($) {
     clearInterval(refreshTimer);
   };
 
-  return {
+  var api = {
     updateTimes: updateTimes,
-    waitTimeRefresh: waitTimeRefresh/** begin test code**/,
-    transformTime: transformTime,
-    getLocationFromURL: getLocationFromURL,
-    render:render/** end test code **/
-  }
+    waitTimeRefresh: waitTimeRefresh
+  };
+
+  /* Begin code to strip on build */
+  api.transformTime = transformTime;
+  api.getLocationFromURL = getLocationFromURL;
+  api.render = render;
+  /* End code to strip on build */
+
+
+  return api;
 }(jQuery);
