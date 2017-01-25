@@ -311,6 +311,7 @@ module.exports = function($) {
           render(branchDisplayData);
         }
         catch(e) {
+          console.log(e.message);
           // Send to google anayltics as error event if we can not render data.
           ga('send', {
             hitType: 'event',
@@ -318,6 +319,9 @@ module.exports = function($) {
             eventAction: e.message,
             eventLabel: window.location.href
           });
+
+          // Do not try to keep running
+          stopWaitTimeRefresh();
 
           return false; // Do not reveal widget with no data.
         }
@@ -338,6 +342,7 @@ module.exports = function($) {
             });
           }
           catch(e) {
+            console.log(e.message);
             // Send to google anayltics as error event if we can not render anything.
             ga('send', {
               hitType: 'event',
