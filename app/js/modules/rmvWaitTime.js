@@ -58,7 +58,7 @@ module.exports = function($) {
   };
 
   /**
-   * Get branch town value.
+   * Get branch town value from url parameter.
    * @function
    * @param {Array} urlParams is an associative array of url parameters,
        returned from urlParser.parseParamsFromUrl().
@@ -117,6 +117,8 @@ module.exports = function($) {
     }
 
     // Everything else: format the time string.
+
+    // Make sure moment js can work with the waitTime string.
     try {
       // Create a moment duration with the waitTime string.
       var m = moment.duration(waitTime);
@@ -147,9 +149,11 @@ module.exports = function($) {
       }
     }
     else {
-      // Round minutes up if there are 15+ seconds.
-      if (m.seconds() >= 15) {
-        m = moment.duration(m).add(1, "minutes");
+      if (m.minutes() >= 1) {
+        // Round up a minute if there are 20+ seconds (and at least 1 minute).
+        if (m.seconds() >= 20) {
+          m = moment.duration(m).add(1, "minutes");
+        }
       }
     }
 

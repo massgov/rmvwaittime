@@ -110,11 +110,19 @@ describe('#transformTime()', function() {
     expect(actual).to.eql(expected);
   });
 
-  it('should round up to nearest minute when "00:**:**" is passed', function() {
+  it('should round up to nearest minute when "00:**:3*" is passed', function() {
     // ... 1 minute should not contain 'minutes'
-    var input = '00:25:25';
+    var input = '00:25:35';
     var actual = rmvWaitTime.transformTime(input);
     var expected = '26 minutes';
+    expect(actual).to.eql(expected);
+  });
+
+  it('should not round up to nearest minute when "00:00:**" is passed', function() {
+    // ... 1 minute should not contain 'minutes'
+    var input = '00:00:45';
+    var actual = rmvWaitTime.transformTime(input);
+    var expected = 'Less than a minute';
     expect(actual).to.eql(expected);
   });
 });
