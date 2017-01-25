@@ -19,12 +19,12 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/jesconstantine/rmvwaittime.git"
+    "url": "git+https://github.com/massgov/rmvwaittime.git"
   },
   "author": "",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/jesconstantine/rmvwaittime/issues"
+    "url": "https://github.com/massgov/rmvwaittime/issues"
   },
-  "homepage": "https://github.com/jesconstantine/rmvwaittime#readme"
+  "homepage": "https://github.com/massgov/rmvwaittime#readme"
 }
