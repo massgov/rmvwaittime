@@ -33,26 +33,26 @@ module.exports = function($) {
     if ($licensing.length) {
       $licensing.text(data.processedLicensing);
     }
-    // else {
-    //   throw new Error("Can not find licensing wait time DOM element.");
-    // }
+    else {
+      throw new Error("Can not find licensing wait time DOM element.");
+    }
 
     var $registration = $el.find('span[data-variable="registration"]');
     if ($registration.length) {
       $registration.text(data.processedRegistration);
     }
-    // else {
-    //   throw new Error("Can not find registration wait time DOM element.");
-    // }
+    else {
+      throw new Error("Can not find registration wait time DOM element.");
+    }
 
     var time = dateTime.getCurrentTime();
     var $timestamp = $el.find('span[data-variable="timestamp"]');
     if ($timestamp.length) {
       $timestamp.text(time);
     }
-    // else {
-    //   throw new Error("Can not find timestamp wait time DOM element.");
-    // }
+    else {
+      throw new Error("Can not find timestamp wait time DOM element.");
+    }
 
   };
 
@@ -306,14 +306,42 @@ module.exports = function($) {
         // transform data
         var branchDisplayData = processWaitTimes(branchData);
         // render information
-        render(branchDisplayData);
+        try {
+          render(branchDisplayData);
+        }
+        catch(e) {
+          // Send to google anayltics as error event if we can not render data.
+          ga('send', {
+            hitType: 'event',
+            eventCategory: 'error',
+            eventAction: e.message,
+            eventLabel: window.location.href
+          });
+
+          return false; // Do not reveal widget with no data.
+        }
+
         $el.removeClass('visually-hidden');
       })
       .fail(function(){
-        render({
-          processedLicensing: waitTimeUnavailableString,
-          processedRegistration: waitTimeUnavailableString
-        });
+        try {
+          render({
+            processedLicensing: waitTimeUnavailableString,
+            processedRegistration: waitTimeUnavailableString
+          });
+        }
+        catch(e) {
+          // Send to google anayltics as error event if we can not render anything.
+          ga('send', {
+            hitType: 'event',
+            eventCategory: 'error',
+            eventAction: e.message,
+            eventLabel: window.location.href
+          });
+
+          return false; // Do not reveal widget with no data.
+        }
+
         $el.removeClass('visually-hidden');
 
         // Do not try to keep running
