@@ -17,7 +17,8 @@ module.exports = function($) {
   "use strict";
 
   var $el = $('.ma__wait-time'),
-  waitTimeUnavailableString = 'Wait time unavailable';
+  waitTimeUnavailableString = 'Wait time unavailable',
+  hasSucceeded = false; // flag to determine if we are on subsequent attempt to updateTimes
 
   // The API URL.
   // var rmvWaitTimeURL = 'https://www.massdot.state.ma.us/feeds/qmaticxml/qmaticXML.aspx';
@@ -322,27 +323,34 @@ module.exports = function($) {
         }
 
         $el.removeClass('visually-hidden');
+
+        // Set flag: we have successfully rendered wait times at least once.
+        hasSucceeded = true;
       })
       .fail(function(){
-        try {
-          render({
-            processedLicensing: waitTimeUnavailableString,
-            processedRegistration: waitTimeUnavailableString
-          });
-        }
-        catch(e) {
-          // Send to google anayltics as error event if we can not render anything.
-          ga('send', {
-            hitType: 'event',
-            eventCategory: 'error',
-            eventAction: e.message,
-            eventLabel: window.location.href
-          });
+        // If this is the first attempt to update wait times, show "Wait time unavailable"
+        // otherwise leave the last successful wait time in place
+        if (!hasSucceeded) {
+          try {
+            render({
+              processedLicensing: waitTimeUnavailableString,
+              processedRegistration: waitTimeUnavailableString
+            });
+          }
+          catch(e) {
+            // Send to google anayltics as error event if we can not render anything.
+            ga('send', {
+              hitType: 'event',
+              eventCategory: 'error',
+              eventAction: e.message,
+              eventLabel: window.location.href
+            });
 
-          return false; // Do not reveal widget with no data.
-        }
+            return false; // Do not reveal widget with no data.
+          }
 
-        $el.removeClass('visually-hidden');
+          $el.removeClass('visually-hidden');
+        }
 
         // Do not try to keep running
         stopWaitTimeRefresh();
