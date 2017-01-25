@@ -271,6 +271,7 @@ module.exports = function($) {
     }
     catch(e) {
       console.log(e);
+      // send to google anayltics as error event if we don't have a location argument
       ga('send', {
         hitType: 'event',
         eventCategory: 'error',
@@ -315,6 +316,7 @@ module.exports = function($) {
       }
       catch (e) {
         console.log(e);
+        // send to google anayltics as error event if we can't get the branch
         ga('send', {
           hitType: 'event',
           eventCategory: 'error',
@@ -330,9 +332,21 @@ module.exports = function($) {
       promise.reject();
     })
     .fail(function(jqXHR, textStatus, errorThrown){
-      // console.log(jqXHR.status, jqXHR.statusText, errorThrown);
-      // var error = new Error(textStatus + ": " + errorThrown + ": " + jqXHR.responseText);
-      // console.log(error);
+      // get + return ajax response Text (html), remove tags, empty items, format string
+      var responseString = jqXHR.responseText.replace(/(<([^>]+)>)/ig,""),
+      responseArray = responseString.split('\n'),
+      cleanResponseArray = responseArray.filter(function(entry) { return entry.trim() != ''; }),
+      message = cleanResponseArray.join(": ");
+      console.log(message);
+
+      // send to google anayltics as error event if we get ajax error
+      ga('send', {
+        hitType: 'event',
+        eventCategory: 'error',
+        eventAction: message,
+        eventLabel: window.location.href
+      });
+
       promise.reject();
     });
 
