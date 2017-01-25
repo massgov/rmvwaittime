@@ -191,23 +191,18 @@ module.exports = function($) {
     // Everything else: format the time string.
 
     // Make sure moment js can work with the waitTime string.
-    try {
-      // Create a moment duration with the waitTime string.
-      var m = moment.duration(waitTime);
-    }
-    catch(e) {
-      console.log(e);
-      // Send to google anayltics as error event if the API changes time string format
-      // in a way that moment.duration doesn't understand.
-      ga('send', {
-        hitType: 'event',
-        eventCategory: 'error',
-        eventAction: e.message,
-        eventLabel: window.location.href
-      });
+    // moment.duration accepts 'HH:MM:SS'
+    // see: https://momentjs.com/docs/#/durations/
+    var durationRegex = /^(\d{2}):(\d{2}):(\d{2})$/;
+    var waitTimeIsDuration = durationRegex.test(waitTime);
 
-      return displayTime; // Wait time unavailable.
+    if (!waitTimeIsDuration) {
+      return displayTime; // Wait time unavailable
+      // throw new Error('The wait time is not duration string following "HH:MM:SS".');
     }
+
+    // Create a moment duration with the waitTime string.
+    var m = moment.duration(waitTime);
 
     // Declare moment formatter template partials.
     var hourTemplate = '',
@@ -280,7 +275,7 @@ module.exports = function($) {
    * @function
    * @param {xml} xml feed of rmv <branches> wait time data.
    * @returns {Object} An object of the requested branch wait time stings for 'licensing'
-        and 'registration'.
+        and 'registration' properties.
    * @throws Error when we can't find the branch corresponding to the passed town in the data feed.
    */
   var getBranch = function(xml) {
@@ -300,12 +295,16 @@ module.exports = function($) {
     }
 
     if (location) {
+      // In XML, branch towns use Title Case, so convert location argument just to be safe.
       var locationTitleCased = stringConversions.titleCase(location);
+
+      // Get the <branch> which matches the location.
       var $branch = $(xml).find('branch').filter(function () {
         return $(this).find('town').text() == locationTitleCased;
       });
 
       if ($branch.length) {
+        // MassDOT confirms every <branch> will have both licensing and registration times.
         return {
           "licensing": $branch.find('licensing').text(),
           "registration": $branch.find('registration').text()
@@ -330,8 +329,9 @@ module.exports = function($) {
       dataType: 'xml'
     })
     .done(function(data){
+      // Get data for the <branch> that we want from the xml.
       try {
-        var branch = getBranch(data); // Only send the data for the branch that we need.
+        var branch = getBranch(data);
       }
       catch (e) {
         console.log(e);
@@ -354,8 +354,8 @@ module.exports = function($) {
       // Get + return ajax response Text (html), remove tags, empty items, format string.
       var responseString = jqXHR.responseText.replace(/(<([^>]+)>)/ig,""),
       responseArray = responseString.split('\n'),
-      cleanResponseArray = responseArray.filter(function(entry) { return entry.trim() != ''; }),
-      message = cleanResponseArray.join(": ");
+      responseArrayNoBlankSpaces = responseArray.filter(function(entry) { return entry.trim() != ''; }),
+      message = responseArrayNoBlankSpaces.join(": ");
       console.log(message);
 
       // Send to google anayltics as error event if we get ajax error.
@@ -381,7 +381,25 @@ module.exports = function($) {
     getBranchData()
       .done(function(branchData){
         // transform data
-        var branchDisplayData = processWaitTimes(branchData);
+        try {
+          var branchDisplayData = processWaitTimes(branchData);
+        }
+        catch(e) {
+          console.log(e.message);
+          // Send to google anayltics as error event if we can not render data.
+          ga('send', {
+            hitType: 'event',
+            eventCategory: 'error',
+            eventAction: e.message,
+            eventLabel: window.location.href
+          });
+
+          // Do not try to keep running
+          stopWaitTimeRefresh();
+
+          return false; // Do not reveal widget with no data.
+        }
+
         // render information
         try {
           render(branchDisplayData);

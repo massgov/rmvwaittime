@@ -102,7 +102,7 @@ describe('#transformTime()', function() {
     expect(actual).to.eql(expected);
   });
 
-  it('should round up to the 2 hours when "01:55:**" is passed', function() {
+  it('should round up to 2 hours when "01:55:**" is passed', function() {
     // ... 1 minute should not contain 'minutes'
     var input = '01:55:55';
     var actual = rmvWaitTime.transformTime(input);
@@ -123,6 +123,14 @@ describe('#transformTime()', function() {
     var input = '00:00:45';
     var actual = rmvWaitTime.transformTime(input);
     var expected = 'Less than a minute';
+    expect(actual).to.eql(expected);
+  });
+
+  it('should display "Wait Time Unavailble"  when "Foo" is passed', function() {
+    // String other than 'Closed' or 'HH:MM:SS' should return 'Wait time unavailable'
+    var input = 'fooooooo';
+    var actual = rmvWaitTime.transformTime(input);
+    var expected = 'Wait time unavailable';
     expect(actual).to.eql(expected);
   });
 });
@@ -147,7 +155,6 @@ describe('#getLocationFromURL()', function() {
     // Pass expect a function that will get called, not the result of calling it
 
     expect(rmvWaitTime.getLocationFromURL.bind(rmvWaitTime.getLocationFromURL, input)).to.throw("No town parameter passed.");
-
   });
 });
 
