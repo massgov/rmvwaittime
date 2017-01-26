@@ -1,0 +1,27 @@
+{
+  "extends": "./app/.eslintrc",
+  "env": {
+    "commonjs": true,
+    "mocha": true,
+    "jquery": true
+  },
+  "globals": {
+    "ga": true
+  },
+  "rules": {
+    // Override this rule from core, make warning instead of error
+    "no-unused-vars": [
+      1,
+      {
+        "vars": "all",
+        "args": "none"
+      }
+    ],
+    "no-console": [
+      1,
+      {
+        "allow": ["warn", "error"]
+      }
+    ]
+  }
+}

@@ -5,8 +5,9 @@
  */
 
 module.exports = {
-  titleCase: function(str) {
-    return str.toLowerCase().split(' ').map(function(word) {
+  titleCase: function (str) {
+    'use strict';
+    return str.toLowerCase().split(' ').map(function (word) {
       return (word.charAt(0).toUpperCase() + word.slice(1));
     }).join(' ');
   }

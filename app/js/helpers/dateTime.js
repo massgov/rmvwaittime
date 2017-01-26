@@ -5,10 +5,11 @@
  */
 
 module.exports = {
-  getCurrentTime: function() {
-    var now = new Date(),
-      hours = now.getHours(),
-      minutes = now.getMinutes();
+  getCurrentTime: function () {
+    'use strict';
+    var now = new Date();
+    var hours = now.getHours();
+    var minutes = now.getMinutes();
 
     var ampm = hours >= 12 ? 'pm' : 'am';
     hours = hours % 12;
