@@ -333,10 +333,9 @@ module.exports = function ($) {
       type: 'GET',
       url: rmvWaitTimeURL,
       cache: false,
-      // dataType: 'xml',
-      dataType: 'json',
-      crossDomain: true
-      // contentType: "application/xml; charset=utf-8"
+      dataType: 'xml',
+      crossDomain: true,
+      contentType: 'application/xml; charset=utf-8'
     })
     .done(function (data) {
       // Get data for the <branch> that we want from the xml.
