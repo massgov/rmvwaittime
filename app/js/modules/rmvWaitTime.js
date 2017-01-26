@@ -21,8 +21,10 @@ module.exports = function($) {
   hasSucceeded = false; // Flag to determine if we are on a subsequent attempt to updateTimes.
 
   // The API URL.
-  // var rmvWaitTimeURL = 'https://www.massdot.state.ma.us/feeds/qmaticxml/qmaticXML.aspx';
-  var rmvWaitTimeURL = 'data/waittime.xml'; // local stub
+  var corsProxy = 'http://cors-proxy.htmldriven.com/?url=';
+  var rmvWaitTimeData = 'https://www.massdot.state.ma.us/feeds/qmaticxml/qmaticXML.aspx';
+  var rmvWaitTimeURL = corsProxy + rmvWaitTimeData;
+  // var rmvWaitTimeURL = 'data/waittime.xml'; // local stub
 
   /**
    * Render the transformed wait times for the requested branch on the page.
@@ -254,16 +256,20 @@ module.exports = function($) {
       type: 'GET',
       url: rmvWaitTimeURL,
       cache: false,
-      dataType: 'xml'
+      // dataType: 'xml',
+      dataType: 'json',
+      crossDomain: true
+      // contentType: "application/xml; charset=utf-8"
     })
     .done(function(data){
       // Get data for the <branch> that we want from the xml.
       try {
-        var branch = getBranch(data);
+        // The XML content is in the body property of the response object.
+        var branch = getBranch(data.body);
       }
       catch (e) {
         console.log(e);
-        // Send to google anayltics as error event if we can't get the branch.
+        // Send to google analytics as error event if we can't get the branch.
         ga('send', {
           hitType: 'event',
           eventCategory: 'error',
@@ -298,7 +304,7 @@ module.exports = function($) {
     });
 
     return promise;
-  }
+  };
 
   /**
    * Gets, transforms, and renders the wait times for a specific rmv branch.
@@ -334,7 +340,7 @@ module.exports = function($) {
         }
         catch(e) {
           console.log(e.message);
-          // Send to google anayltics as error event if we can not render data.
+          // Send to google analytics as error event if we can not render data.
           ga('send', {
             hitType: 'event',
             eventCategory: 'error',
@@ -365,7 +371,7 @@ module.exports = function($) {
           }
           catch(e) {
             console.log(e.message);
-            // Send to google anayltics as error event if we can not render anything.
+            // Send to google analytics as error event if we can not render anything.
             ga('send', {
               hitType: 'event',
               eventCategory: 'error',

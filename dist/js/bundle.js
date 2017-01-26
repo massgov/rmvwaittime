@@ -93,8 +93,10 @@ module.exports = function($) {
   hasSucceeded = false; // Flag to determine if we are on a subsequent attempt to updateTimes.
 
   // The API URL.
-  // var rmvWaitTimeURL = 'https://www.massdot.state.ma.us/feeds/qmaticxml/qmaticXML.aspx';
-  var rmvWaitTimeURL = 'data/waittime.xml'; // local stub
+  var corsProxy = 'http://cors-proxy.htmldriven.com/?url=';
+  var rmvWaitTimeData = 'https://www.massdot.state.ma.us/feeds/qmaticxml/qmaticXML.aspx';
+  var rmvWaitTimeURL = corsProxy + rmvWaitTimeData;
+  // var rmvWaitTimeURL = 'data/waittime.xml'; // local stub
 
   /**
    * Render the transformed wait times for the requested branch on the page.
@@ -131,7 +133,7 @@ module.exports = function($) {
 
   /**
    * Get branch town value from url parameter.
-   * @function
+   * @function getLocationFromURL
    * @param {Array} urlParams is an associative array of url parameters,
        returned from urlParser.parseParamsFromUrl().
    * @returns {String} The name of the town passed to the script.
@@ -285,7 +287,7 @@ module.exports = function($) {
     }
     catch(e) {
       console.log(e);
-      // Send to google anayltics as error event if we don't have a location argument.
+      // Send to google analytics as error event if we don't have a location argument.
       ga('send', {
         hitType: 'event',
         eventCategory: 'error',
@@ -326,16 +328,20 @@ module.exports = function($) {
       type: 'GET',
       url: rmvWaitTimeURL,
       cache: false,
-      dataType: 'xml'
+      // dataType: 'xml',
+      dataType: 'json',
+      crossDomain: true
+      // contentType: "application/xml; charset=utf-8"
     })
     .done(function(data){
       // Get data for the <branch> that we want from the xml.
       try {
-        var branch = getBranch(data);
+        // The XML content is in the body property of the response object.
+        var branch = getBranch(data.body);
       }
       catch (e) {
         console.log(e);
-        // Send to google anayltics as error event if we can't get the branch.
+        // Send to google analytics as error event if we can't get the branch.
         ga('send', {
           hitType: 'event',
           eventCategory: 'error',
@@ -358,7 +364,7 @@ module.exports = function($) {
       message = responseArrayNoBlankSpaces.join(": ");
       console.log(message);
 
-      // Send to google anayltics as error event if we get ajax error.
+      // Send to google analytics as error event if we get ajax error.
       ga('send', {
         hitType: 'event',
         eventCategory: 'error',
@@ -370,7 +376,7 @@ module.exports = function($) {
     });
 
     return promise;
-  }
+  };
 
   /**
    * Gets, transforms, and renders the wait times for a specific rmv branch.
@@ -406,7 +412,7 @@ module.exports = function($) {
         }
         catch(e) {
           console.log(e.message);
-          // Send to google anayltics as error event if we can not render data.
+          // Send to google analytics as error event if we can not render data.
           ga('send', {
             hitType: 'event',
             eventCategory: 'error',
@@ -437,7 +443,7 @@ module.exports = function($) {
           }
           catch(e) {
             console.log(e.message);
-            // Send to google anayltics as error event if we can not render anything.
+            // Send to google analytics as error event if we can not render anything.
             ga('send', {
               hitType: 'event',
               eventCategory: 'error',
@@ -472,12 +478,11 @@ module.exports = function($) {
     waitTimeRefresh: waitTimeRefresh
   };
 
-  /* Begin code to strip on build */
+  //removeIf(production)
   api.transformTime = transformTime;
   api.getLocationFromURL = getLocationFromURL;
   api.render = render;
-  /* End code to strip on build */
-
+  //endRemoveIf(production)
 
   return api;
 }(jQuery);
