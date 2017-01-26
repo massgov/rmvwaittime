@@ -26,8 +26,8 @@ module.exports = function ($) {
   // var rmvWaitTimeData = 'https://www.massdot.state.ma.us/feeds/qmaticxml/qmaticXML.aspx';
   // var rmvWaitTimeURL = corsProxy + rmvWaitTimeData;
   // var rmvWaitTimeURL = 'data/waittime.xml'; // local stub
-  // var rmvWaitTimeURL = 'https://s3.amazonaws.com/yriahi/waittime.xml';
-  var rmvWaitTimeURL = 'http://rmvwaittime.digital.mass.gov.s3-website-us-east-1.amazonaws.com/';
+  var rmvWaitTimeURL = 'https://s3.amazonaws.com/yriahi/waittime.xml';
+  // var rmvWaitTimeURL = 'http://rmvwaittime.digital.mass.gov.s3-website-us-east-1.amazonaws.com/';
 
   /**
    * Render the transformed wait times for the requested branch on the page.
