@@ -6,10 +6,11 @@
  */
 
 module.exports = {
-  getCurrentTime: function() {
-    var now = new Date(),
-      hours = now.getHours(),
-      minutes = now.getMinutes();
+  getCurrentTime: function () {
+    'use strict';
+    var now = new Date();
+    var hours = now.getHours();
+    var minutes = now.getMinutes();
 
     var ampm = hours >= 12 ? 'pm' : 'am';
     hours = hours % 12;
@@ -28,8 +29,9 @@ module.exports = {
  */
 
 module.exports = {
-  titleCase: function(str) {
-    return str.toLowerCase().split(' ').map(function(word) {
+  titleCase: function (str) {
+    'use strict';
+    return str.toLowerCase().split(' ').map(function (word) {
       return (word.charAt(0).toUpperCase() + word.slice(1));
     }).join(' ');
   }
@@ -43,7 +45,8 @@ module.exports = {
  * @todo move this functionality into a mayflower helper
  */
 module.exports = {
-  parseParamsFromUrl: function() {
+  parseParamsFromUrl: function () {
+    'use strict';
     var params = {};
     var parts = window.location.search.substr(1).split('&');
     for (var i = 0; i < parts.length; i++) {
@@ -58,26 +61,26 @@ module.exports = {
 };
 
 },{}],4:[function(require,module,exports){
-(function(window, document){
-  "use strict";
+(function (window, document) {
+  'use strict';
 
-  var waitTime = require("./modules/rmvWaitTime.js");
+  var waitTime = require('./modules/rmvWaitTime.js');
 
   // Update the wait times once then set interval to update again every minute.
   waitTime.updateTimes();
   waitTime.waitTimeRefresh();
-  
+
 })(window, document);
 
 },{"./modules/rmvWaitTime.js":5}],5:[function(require,module,exports){
 // Helpers
-var dateTime = require("../helpers/dateTime.js");
-var urlParser = require("../helpers/urlParser.js");
-var stringConversions = require("../helpers/stringConversions.js");
+var dateTime = require('../helpers/dateTime.js');
+var urlParser = require('../helpers/urlParser.js');
+var stringConversions = require('../helpers/stringConversions.js');
 
 // Libraries
-var moment = require("moment");
-require("moment-duration-format");
+var moment = require('moment');
+require('moment-duration-format');
 
 /**
 * @function
@@ -85,31 +88,33 @@ require("moment-duration-format");
 * Gets, transforms, and renders the wait times for a specific rmv branch.
 * See ticket: https://jira.state.ma.us/browse/DP-822
 */
-module.exports = function($) {
-  "use strict";
+module.exports = function ($) {
+  'use strict';
 
-  var $el = $('.ma__wait-time'),
-  waitTimeUnavailableString = 'Wait time unavailable', // Used more than once.
-  hasSucceeded = false; // Flag to determine if we are on a subsequent attempt to updateTimes.
+  var $el = $('.ma__wait-time');
+  var waitTimeUnavailableString = 'Wait time unavailable'; // Used more than once.
+  var hasSucceeded = false; // Flag to determine if we are on a subsequent attempt to updateTimes.
 
   // The API URL.
-  var corsProxy = 'http://cors-proxy.htmldriven.com/?url=';
-  var rmvWaitTimeData = 'https://www.massdot.state.ma.us/feeds/qmaticxml/qmaticXML.aspx';
-  var rmvWaitTimeURL = corsProxy + rmvWaitTimeData;
+  // var corsProxy = 'http://cors-proxy.htmldriven.com/?url=';
+  // var corsProxy = 'https://crossorigin.me/';
+  // var rmvWaitTimeData = 'https://www.massdot.state.ma.us/feeds/qmaticxml/qmaticXML.aspx';
+  // var rmvWaitTimeURL = corsProxy + rmvWaitTimeData;
   // var rmvWaitTimeURL = 'data/waittime.xml'; // local stub
+  var rmvWaitTimeURL = 'https://s3.amazonaws.com/yriahi/waittime.xml';
 
   /**
    * Render the transformed wait times for the requested branch on the page.
    * @function
    * @param {Object} data branch display data with processed wait times.
    */
-  var render = function(data) {
+  var render = function (data) {
     var $licensing = $el.find('span[data-variable="licensing"]');
     if ($licensing.length) {
       $licensing.text(data.processedLicensing);
     }
     else {
-      throw new Error("Can not find licensing wait time DOM element.");
+      throw new Error('Can not find licensing wait time DOM element.');
     }
 
     var $registration = $el.find('span[data-variable="registration"]');
@@ -117,7 +122,7 @@ module.exports = function($) {
       $registration.text(data.processedRegistration);
     }
     else {
-      throw new Error("Can not find registration wait time DOM element.");
+      throw new Error('Can not find registration wait time DOM element.');
     }
 
     var time = dateTime.getCurrentTime();
@@ -126,7 +131,7 @@ module.exports = function($) {
       $timestamp.text(time);
     }
     else {
-      throw new Error("Can not find timestamp wait time DOM element.");
+      throw new Error('Can not find timestamp wait time DOM element.');
     }
 
   };
@@ -136,10 +141,10 @@ module.exports = function($) {
    * @function getLocationFromURL
    * @param {Array} urlParams is an associative array of url parameters,
        returned from urlParser.parseParamsFromUrl().
-   * @returns {String} The name of the town passed to the script.
+   * @return {String} The name of the town passed to the script.
    * @throws Error when 'town' is not found in the array of parameters.
    */
-  var getLocationFromURL = function(urlParams) {
+  var getLocationFromURL = function (urlParams) {
     // Define param for the branch town query.
     var branchParamName = 'town';
 
@@ -147,7 +152,7 @@ module.exports = function($) {
       return urlParams[branchParamName];
     }
     else {
-      throw new Error("No town parameter passed.");
+      throw new Error('No town parameter passed.');
     }
   };
 
@@ -155,7 +160,7 @@ module.exports = function($) {
    * Transform the wait time raw strings into processed wait time strings according to ticket spec.
    * @function
    * @param {String} waitTime is the raw wait time for either the branch licensing or registration.
-   * @returns {String} A transformed wait time duration in human readable format.
+   * @return {String} A transformed wait time duration in human readable format.
    *
    * Specs from ticket (see link at top of file):
    * Closed = Closed
@@ -168,18 +173,18 @@ module.exports = function($) {
    *  >> round minutes up to quarter hour minutes when minutes not = 0
    * if < 1 hour: round up to the minute
    */
-  var transformTime = function(waitTime) {
+  var transformTime = function (waitTime) {
     // Default to unavailable.
     var displayTime = waitTimeUnavailableString;
 
     // Closed = 'Closed'.
-    if (waitTime == 'Closed') {
+    if (waitTime === 'Closed') {
       displayTime = 'Closed';
       return displayTime;
     }
 
     // 0 = 'No wait time'.
-    if (waitTime == '00:00:00') {
+    if (waitTime === '00:00:00') {
       displayTime = 'No wait time';
       return displayTime;
     }
@@ -207,39 +212,39 @@ module.exports = function($) {
     var m = moment.duration(waitTime);
 
     // Declare moment formatter template partials.
-    var hourTemplate = '',
-      minuteTemplate = '';
+    var hourTemplate = '';
+    var minuteTemplate = '';
 
     // Round minutes up to nearest 15 if there is 1+ hour.
-    if ( m.hours() >= 1 ) {
-      if (m.minutes() != 0 ) { // Do not round 0 minutes up to 15.
+    if (m.hours() >= 1) {
+      if (m.minutes() !== 0) { // Do not round 0 minutes up to 15.
         var remainder = 15 - m.minutes() % 15;
-        m = moment.duration(m).add(remainder, "minutes");
+        m = moment.duration(m).add(remainder, 'minutes');
       }
     }
     else {
       if (m.minutes() >= 1) {
         // Round up a minute if there are 20+ seconds (and at least 1 minute).
         if (m.seconds() >= 20) {
-          m = moment.duration(m).add(1, "minutes");
+          m = moment.duration(m).add(1, 'minutes');
         }
       }
     }
 
     // Set hour template partial.
-    if (( m.hours() > 1 )) {
-      hourTemplate = "h [hours]";
+    if (m.hours() > 1) {
+      hourTemplate = 'h [hours]';
     }
-    if (( m.hours() == 1 )) {
-      hourTemplate = "h [hour]";
+    if (m.hours() === 1) {
+      hourTemplate = 'h [hour]';
     }
 
     // Set minute template partial.
-    if (m.minutes() == 1) {
-      minuteTemplate = "m [minute]";
+    if (m.minutes() === 1) {
+      minuteTemplate = 'm [minute]';
     }
     if (m.minutes() > 1) {
-      minuteTemplate = "m [minutes]";
+      minuteTemplate = 'm [minutes]';
     }
 
     // Create format template from partials:
@@ -250,7 +255,7 @@ module.exports = function($) {
       : hourTemplate + minuteTemplate;
 
     // Apply the template to the duration
-    displayTime = m.format({ template: template});
+    displayTime = m.format({template: template});
 
     return displayTime;
   };
@@ -259,16 +264,16 @@ module.exports = function($) {
    * Pass the wait time raw strings into function to transform wait time strings according to ticket spec.
    * @function
    * @param {Object} branch contains wait time strings for licensing and registration.
-   * @returns {Object} An object of the requested branch with additional processed wait time stings for 'licensing'
+   * @return {Object} An object of the requested branch with additional processed wait time stings for 'licensing'
    * and 'registration'.
    */
-  var processWaitTimes = function(branch) {
+  var processWaitTimes = function (branch) {
 
     // Pass each wait time string (licensing + registration) through transform function.
     branch.processedLicensing = transformTime(branch.licensing);
     branch.processedRegistration = transformTime(branch.registration);
 
-    console.log(branch);
+    console.warn(branch);
     return branch;
   };
 
@@ -276,17 +281,17 @@ module.exports = function($) {
    * Extract the specific branch wait times from xml feed.
    * @function
    * @param {xml} xml feed of rmv <branches> wait time data.
-   * @returns {Object} An object of the requested branch wait time stings for 'licensing'
+   * @return {Object} An object of the requested branch wait time stings for 'licensing'
         and 'registration' properties.
    * @throws Error when we can't find the branch corresponding to the passed town in the data feed.
    */
-  var getBranch = function(xml) {
+  var getBranch = function (xml) {
     var urlParams = urlParser.parseParamsFromUrl();
     try {
       var location = getLocationFromURL(urlParams);
     }
-    catch(e) {
-      console.log(e);
+    catch (e) {
+      console.error(e);
       // Send to google analytics as error event if we don't have a location argument.
       ga('send', {
         hitType: 'event',
@@ -302,14 +307,14 @@ module.exports = function($) {
 
       // Get the <branch> which matches the location.
       var $branch = $(xml).find('branch').filter(function () {
-        return $(this).find('town').text() == locationTitleCased;
+        return $(this).find('town').text() === locationTitleCased;
       });
 
       if ($branch.length) {
         // MassDOT confirms every <branch> will have both licensing and registration times.
         return {
-          "licensing": $branch.find('licensing').text(),
-          "registration": $branch.find('registration').text()
+          licensing: $branch.find('licensing').text(),
+          registration: $branch.find('registration').text()
         };
       }
       throw new Error('Could not find wait time information for provided location.');
@@ -319,9 +324,9 @@ module.exports = function($) {
   /**
    * Get the rmv wait times for a specific branch.
    * @function
-   * @returns {Promise} A promise which contains only the requested branch's wait times on success.
+   * @return {Promise} A promise which contains only the requested branch's wait times on success.
    */
-  var getBranchData = function() {
+  var getBranchData = function () {
     var promise = $.Deferred();
 
     $.ajax({
@@ -333,14 +338,14 @@ module.exports = function($) {
       crossDomain: true
       // contentType: "application/xml; charset=utf-8"
     })
-    .done(function(data){
+    .done(function (data) {
       // Get data for the <branch> that we want from the xml.
       try {
         // The XML content is in the body property of the response object.
         var branch = getBranch(data.body);
       }
       catch (e) {
-        console.log(e);
+        console.error(e);
         // Send to google analytics as error event if we can't get the branch.
         ga('send', {
           hitType: 'event',
@@ -356,19 +361,19 @@ module.exports = function($) {
 
       promise.reject();
     })
-    .fail(function(jqXHR, textStatus, errorThrown){
+    .fail(function (jqXHR, textStatus, errorThrown) {
       // Get + return ajax response Text (html), remove tags, empty items, format string.
-      var responseString = jqXHR.responseText.replace(/(<([^>]+)>)/ig,""),
-      responseArray = responseString.split('\n'),
-      responseArrayNoBlankSpaces = responseArray.filter(function(entry) { return entry.trim() != ''; }),
-      message = responseArrayNoBlankSpaces.join(": ");
-      console.log(message);
+      // var responseString = jqXHR.responseText.replace(/(<([^>]+)>)/ig, '');
+      // var responseArray = responseString.split('\n');
+      // var responseArrayNoBlankSpaces = responseArray.filter(function (entry) { return entry.trim() !== ''; });
+      // var message = responseArrayNoBlankSpaces.join(': ');
+      console.error(textStatus);
 
       // Send to google analytics as error event if we get ajax error.
       ga('send', {
         hitType: 'event',
         eventCategory: 'error',
-        eventAction: message,
+        eventAction: textStatus,
         eventLabel: window.location.href
       });
 
@@ -382,16 +387,16 @@ module.exports = function($) {
    * Gets, transforms, and renders the wait times for a specific rmv branch.
    * @function
    */
-  var updateTimes = function() {
+  var updateTimes = function () {
     // get the branch data
     getBranchData()
-      .done(function(branchData){
+      .done(function (branchData) {
         // transform data
         try {
           var branchDisplayData = processWaitTimes(branchData);
         }
-        catch(e) {
-          console.log(e.message);
+        catch (e) {
+          console.error(e.message);
           // Send to google anayltics as error event if we can not render data.
           ga('send', {
             hitType: 'event',
@@ -410,8 +415,8 @@ module.exports = function($) {
         try {
           render(branchDisplayData);
         }
-        catch(e) {
-          console.log(e.message);
+        catch (e) {
+          console.error(e.message);
           // Send to google analytics as error event if we can not render data.
           ga('send', {
             hitType: 'event',
@@ -431,7 +436,7 @@ module.exports = function($) {
         // Set flag: we have successfully rendered wait times at least once.
         hasSucceeded = true;
       })
-      .fail(function(){
+      .fail(function () {
         // If this is the first attempt to update wait times, show "Wait time unavailable"
         // otherwise leave the last successful wait time in place
         if (!hasSucceeded) {
@@ -441,8 +446,8 @@ module.exports = function($) {
               processedRegistration: waitTimeUnavailableString
             });
           }
-          catch(e) {
-            console.log(e.message);
+          catch (e) {
+            console.error(e.message);
             // Send to google analytics as error event if we can not render anything.
             ga('send', {
               hitType: 'event',
@@ -465,11 +470,11 @@ module.exports = function($) {
   // Define setInterval reference variable inside module so we can clear it from within.
   var refreshTimer = null;
 
-  var waitTimeRefresh = function() {
+  var waitTimeRefresh = function () {
     refreshTimer = setInterval(this.updateTimes, 60000);
   };
 
-  var stopWaitTimeRefresh = function() {
+  var stopWaitTimeRefresh = function () {
     clearInterval(refreshTimer);
   };
 
@@ -478,11 +483,11 @@ module.exports = function($) {
     waitTimeRefresh: waitTimeRefresh
   };
 
-  //removeIf(production)
+  // removeIf(production)
   api.transformTime = transformTime;
   api.getLocationFromURL = getLocationFromURL;
   api.render = render;
-  //endRemoveIf(production)
+  // endRemoveIf(production)
 
   return api;
 }(jQuery);
