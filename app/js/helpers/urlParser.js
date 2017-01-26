@@ -5,7 +5,8 @@
  * @todo move this functionality into a mayflower helper
  */
 module.exports = {
-  parseParamsFromUrl: function() {
+  parseParamsFromUrl: function () {
+    'use strict';
     var params = {};
     var parts = window.location.search.substr(1).split('&');
     for (var i = 0; i < parts.length; i++) {
