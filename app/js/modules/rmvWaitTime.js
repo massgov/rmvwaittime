@@ -21,10 +21,12 @@ module.exports = function($) {
   hasSucceeded = false; // Flag to determine if we are on a subsequent attempt to updateTimes.
 
   // The API URL.
-  var corsProxy = 'http://cors-proxy.htmldriven.com/?url=';
-  var rmvWaitTimeData = 'https://www.massdot.state.ma.us/feeds/qmaticxml/qmaticXML.aspx';
-  var rmvWaitTimeURL = corsProxy + rmvWaitTimeData;
+  // var corsProxy = 'http://cors-proxy.htmldriven.com/?url=';
+  // var corsProxy = 'https://crossorigin.me/';
+  // var rmvWaitTimeData = 'https://www.massdot.state.ma.us/feeds/qmaticxml/qmaticXML.aspx';
+  // var rmvWaitTimeURL = corsProxy + rmvWaitTimeData;
   // var rmvWaitTimeURL = 'data/waittime.xml'; // local stub
+  var rmvWaitTimeURL = 'https://s3.amazonaws.com/yriahi/waittime.xml';
 
   /**
    * Render the transformed wait times for the requested branch on the page.
