@@ -341,7 +341,7 @@ module.exports = function ($) {
       // Get data for the <branch> that we want from the xml.
       try {
         // The XML content is in the body property of the response object.
-        var branch = getBranch(data.body);
+        var branch = getBranch(data);
       }
       catch (e) {
         console.error(e);
