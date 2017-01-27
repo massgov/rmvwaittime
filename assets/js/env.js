@@ -1,1 +1,1 @@
-var themePath = '/assets';
+var themePath = 'assets';
