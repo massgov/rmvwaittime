@@ -28,6 +28,8 @@ module.exports = function ($) {
    * Render the transformed wait times for the requested branch on the page.
    * @function
    * @param {Object} data branch display data with processed wait times.
+   *
+   * On first run, visual rendering of any markup is dependent on successful return from this function.
    */
   var render = function (data) {
     var $licensing = $el.find('span[data-variable="licensing"]');
@@ -208,8 +210,9 @@ module.exports = function ($) {
    */
   var getBranch = function (xml) {
     var urlParams = urlParser.parseParamsFromUrl();
+    var location;
     try {
-      var location = getLocationFromURL(urlParams);
+      location = getLocationFromURL(urlParams);
     }
     catch (e) {
       console.error(e);
@@ -260,8 +263,9 @@ module.exports = function ($) {
     })
     .done(function (data) {
       // Get data for the <branch> that we want from the xml.
+      var branch;
       try {
-        var branch = getBranch(data);
+        branch = getBranch(data);
       }
       catch (e) {
         console.error(e);
@@ -281,11 +285,6 @@ module.exports = function ($) {
       promise.reject();
     })
     .fail(function (jqXHR, textStatus, errorThrown) {
-      // Get + return ajax response Text (html), remove tags, empty items, format string.
-      // var responseString = jqXHR.responseText.replace(/(<([^>]+)>)/ig, '');
-      // var responseArray = responseString.split('\n');
-      // var responseArrayNoBlankSpaces = responseArray.filter(function (entry) { return entry.trim() !== ''; });
-      // var message = responseArrayNoBlankSpaces.join(': ');
       console.error(textStatus);
 
       // Send to google analytics as error event if we get ajax error.
@@ -311,8 +310,9 @@ module.exports = function ($) {
     getBranchData()
       .done(function (branchData) {
         // transform data
+        var branchDisplayData;
         try {
-          var branchDisplayData = processWaitTimes(branchData);
+          branchDisplayData = processWaitTimes(branchData);
         }
         catch (e) {
           console.error(e.message);
