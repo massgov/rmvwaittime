@@ -21,12 +21,7 @@ module.exports = function ($) {
   var hasSucceeded = false; // Flag to determine if we are on a subsequent attempt to updateTimes.
 
   // The API URL.
-  // var corsProxy = 'http://cors-proxy.htmldriven.com/?url=';
-  // var corsProxy = 'https://crossorigin.me/';
-  // var rmvWaitTimeData = 'https://www.massdot.state.ma.us/feeds/qmaticxml/qmaticXML.aspx';
-  // var rmvWaitTimeURL = corsProxy + rmvWaitTimeData;
-  // var rmvWaitTimeURL = 'data/waittime.xml'; // local stub
-  var rmvWaitTimeURL = 'https://s3.amazonaws.com/yriahi/waittime.xml';
+  var rmvWaitTimeURL = 'https://9p83os0fkf.execute-api.us-east-1.amazonaws.com/v1/waittime';
   // var rmvWaitTimeURL = 'http://rmvwaittime.digital.mass.gov.s3-website-us-east-1.amazonaws.com/';
 
   /**
@@ -321,7 +316,7 @@ module.exports = function ($) {
         }
         catch (e) {
           console.error(e.message);
-          // Send to google anayltics as error event if we can not render data.
+          // Send to google analytics as error event if we can not render data.
           ga('send', {
             hitType: 'event',
             eventCategory: 'error',
