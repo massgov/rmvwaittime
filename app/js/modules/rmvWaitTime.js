@@ -20,9 +20,9 @@ module.exports = function ($) {
   var waitTimeUnavailableString = 'Wait time unavailable'; // Used more than once.
   var hasSucceeded = false; // Flag to determine if we are on a subsequent attempt to updateTimes.
 
-  // The API URL.
+  // The cors-enabled API gateway URL on our AWS.
+  // See: http://docs.aws.amazon.com/apigateway/latest/developerguide/api-gateway-create-api-as-simple-proxy-for-http.html
   var rmvWaitTimeURL = 'https://9p83os0fkf.execute-api.us-east-1.amazonaws.com/v1/waittime';
-  // var rmvWaitTimeURL = 'http://rmvwaittime.digital.mass.gov.s3-website-us-east-1.amazonaws.com/';
 
   /**
    * Render the transformed wait times for the requested branch on the page.
