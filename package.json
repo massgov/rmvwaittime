@@ -8,18 +8,23 @@
     "moment-duration-format": "^1.3.0"
   },
   "devDependencies": {
+    "browser-sync": "^2.18.6",
     "browserify": "^13.3.0",
     "chai": "^3.5.0",
     "eslint": "^3.14.1",
     "gulp": "^3.9.1",
     "gulp-remove-code": "^1.0.2",
-    "gulp-webserver": "^0.9.1",
+    "gulp-util": "^3.0.8",
     "jsdom": "^9.9.1",
-    "mocha": "^3.2.0"
+    "lodash.assign": "^4.2.0",
+    "mocha": "^3.2.0",
+    "vinyl-source-stream": "^1.1.0",
+    "watchify": "^3.9.0"
   },
   "scripts": {
-    "build-js": "browserify ./app/js/main.js > ./dist/js/bundle.js",
-    "test-js": "eslint --debug --ignore-path './.eslintignore' './app/**/*.js' && mocha  ./app/js/tests/rmvWaitTime-spec.js"
+    "dev": "gulp watch",
+    "build": "gulp js",
+    "test": "eslint --debug --ignore-path './.eslintignore' './app/**/*.js' && mocha  ./app/js/tests/rmvWaitTime-spec.js"
   },
   "repository": {
     "type": "git",
