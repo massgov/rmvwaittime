@@ -1,6 +1,6 @@
 {
   "name": "rmv-waittime",
-  "version": "0.0.1",
+  "version": "1.1.0",
   "description": "Gets, transforms, and renders the wait times for a specific rmv branch.",
   "main": "main.js",
   "dependencies": {
