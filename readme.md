@@ -10,15 +10,16 @@ and presents them using a component which uses Mayflower Assets.
 - Static assets copied from [Mayflower v3.1.0](http://mayflower.digital.mass.gov/)
 - RMV wait time data feed: https://www.massdot.state.ma.us/feeds/qmaticxml/qmaticXML.aspx
 - CORS enabled API proxy using AWS (_since data source is not cors enabled_): http://docs.aws.amazon.com/apigateway/latest/developerguide/how-to-cors.html 
+
+## Working with the App
+###  To work locally
+This project uses [Browserify](http://browserify.org/) (_to bundle JS_) with [watchify](https://github.com/substack/watchify) (_to watch for and rebuild on changes_) and [Browsersync](https://browsersync.io) (_to server and reload on changes_).
  
-###  To Serve locally
-- From project root, run `gulp serve` and a browser window should automatically open to `localhost:8000` -- don't forget `/?town=Boston`
-
-###  To do work and rebuild JS
-- This project uses [Browserify](http://browserify.org/).  After doing work, run `npm run build-js` to update `bundle.js`, which is the script included `in index.html`
+- From project root, run `npm run dev` and a browser window should automatically open to `localhost:3000/?town=Boston`
+- Do work on JS or HTML files and when you save, the JS will be automatically rebuild and the app will automatically reload.
 
 
-### To Implement
+## Implementing the widget
 1. In mass Drupal instance, add a node of type `Right Rail Layout` 
 2. Click the `Extended Header` tab
 3. Add an `iframe paragraph`

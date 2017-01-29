@@ -4,4 +4,4 @@ dependencies:
 
 test:
   override:
-    - npm run test-js
+    - npm run test
