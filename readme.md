@@ -15,6 +15,7 @@ and presents them using a component which uses Mayflower Assets.
 ###  To work locally
 This project uses [Browserify](http://browserify.org/) (_to bundle JS_) with [watchify](https://github.com/substack/watchify) (_to watch for and rebuild on changes_) and [Browsersync](https://browsersync.io) (_to server and reload on changes_).
  
+- Run `npm install` prior to running `npm run dev`.
 - From project root, run `npm run dev` and a browser window should automatically open to `localhost:3000/?town=Boston`
 - Do work on JS or HTML files and when you save, the JS will be automatically rebuild and the app will automatically reload.
 
