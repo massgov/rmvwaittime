@@ -21,8 +21,8 @@ This project uses [Browserify](http://browserify.org/) (_to bundle JS_) with [wa
 
 
 ## Implementing the widget
-1. In mass Drupal instance, add a node of type `Right Rail Layout` 
-2. Click the `Extended Header` tab
-3. Add an `iframe paragraph`
+1. In mass Drupal instance, add a node of type `Location Page` 
+2. Click the `Header` tab
+3. Under the `Widget Area` click on the `Add iFrame` button.
 4. Use the following as the iframe source: `https://massgov.github.io/rmvwaittime/?town=Boston` where Boston is the name of the town whose location page you are building.  
 - For spelling and list of towns, see [raw MassDOT feed](https://www.massdot.state.ma.us/feeds/qmaticxml/qmaticXML.aspx).
