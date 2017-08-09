@@ -65,7 +65,6 @@ module.exports = function ($) {
     }
 
     var $ariaLiveMessage = $el.find('.ma__wait-time__live-region');
-    console.log(ariaLiveMessage);
     if ($ariaLiveMessage.length) {
       $ariaLiveMessage.text(ariaLiveMessage);
     }
