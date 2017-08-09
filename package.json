@@ -4,22 +4,22 @@
   "description": "Gets, transforms, and renders the wait times for a specific rmv branch.",
   "main": "main.js",
   "dependencies": {
-    "moment": "^2.17.1",
-    "moment-duration-format": "^1.3.0"
+    "moment": "2.17.1",
+    "moment-duration-format": "1.3.0"
   },
   "devDependencies": {
-    "browser-sync": "^2.18.6",
-    "browserify": "^13.3.0",
-    "chai": "^3.5.0",
-    "eslint": "^3.14.1",
-    "gulp": "^3.9.1",
-    "gulp-remove-code": "^1.0.2",
-    "gulp-util": "^3.0.8",
-    "jsdom": "^9.9.1",
-    "lodash.assign": "^4.2.0",
-    "mocha": "^3.2.0",
-    "vinyl-source-stream": "^1.1.0",
-    "watchify": "^3.9.0"
+    "browser-sync": "2.18.6",
+    "browserify": "13.3.0",
+    "chai": "3.5.0",
+    "eslint": "3.14.1",
+    "gulp": "3.9.1",
+    "gulp-remove-code": "1.0.2",
+    "gulp-util": "3.0.8",
+    "jsdom": "9.9.1",
+    "lodash.assign": "4.2.0",
+    "mocha": "3.2.0",
+    "vinyl-source-stream": "1.1.0",
+    "watchify": "3.9.0"
   },
   "scripts": {
     "dev": "gulp watch",
