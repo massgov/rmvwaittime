@@ -32,8 +32,12 @@ module.exports = function ($) {
    * On first run, visual rendering of any markup is dependent on successful return from this function.
    */
   var render = function (data) {
+    var ariaLiveMessage = '';
     var $licensing = $el.find('span[data-variable="licensing"]');
     if ($licensing.length) {
+      if ($licensing.text() !== data.processedLicensing) {
+        ariaLiveMessage += 'Licensing wait time updated to ' + data.processedLicensing + ' ';
+      }
       $licensing.text(data.processedLicensing);
     }
     else {
@@ -42,6 +46,9 @@ module.exports = function ($) {
 
     var $registration = $el.find('span[data-variable="registration"]');
     if ($registration.length) {
+      if ($registration.text() !== data.processedRegistration) {
+        ariaLiveMessage += 'Registration wait time updated to ' + data.processedRegistration;
+      }
       $registration.text(data.processedRegistration);
     }
     else {
@@ -52,6 +59,14 @@ module.exports = function ($) {
     var $timestamp = $el.find('span[data-variable="timestamp"]');
     if ($timestamp.length) {
       $timestamp.text(time);
+    }
+    else {
+      throw new Error('Can not find timestamp wait time DOM element.');
+    }
+
+    var $ariaLiveMessage = $el.find('.ma__wait-time__live-region');
+    if ($ariaLiveMessage.length) {
+      $ariaLiveMessage.text(ariaLiveMessage);
     }
     else {
       throw new Error('Can not find timestamp wait time DOM element.');
