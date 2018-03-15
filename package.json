@@ -4,8 +4,8 @@
   "description": "Gets, transforms, and renders the wait times for a specific rmv branch.",
   "main": "main.js",
   "dependencies": {
-    "moment": "2.17.1",
-    "moment-duration-format": "1.3.0"
+    "moment": "2.21.0",
+    "moment-duration-format": "2.2.2"
   },
   "devDependencies": {
     "browser-sync": "2.18.6",
