@@ -8,9 +8,6 @@ In order to change the MassDOT server url, if/when needed, Go to _AWS > APIs > r
 ## Amazon API Gateway
 APIs > rmvwaittime (9p83os0fkf) > Resources>/waittime (a5hsyy) > GET > Endpoint URL
 
-```
-var rmvWaitTimeURL = 'https://9p83os0fkf.execute-api.us-east-1.amazonaws.com/v1/waittime';
-```
 
 ## Feed URL:
 ### Old feed url:
