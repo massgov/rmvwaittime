@@ -8,7 +8,7 @@ and presents them using a component which uses Mayflower Assets.
 
 ## Dependencies
 - Static assets copied from [Mayflower v3.1.0](http://mayflower.digital.mass.gov/)
-- RMV wait time data feed: https://www.massdot.state.ma.us/feeds/qmaticxml/qmaticXML.aspx
+- RMV wait time data feed: https://dotfeeds.state.ma.us/api/RMVBranchWaitTime/Index
 - CORS enabled API proxy using AWS (_since data source is not cors enabled_): http://docs.aws.amazon.com/apigateway/latest/developerguide/how-to-cors.html 
 
 ## Working with the App
