@@ -8,7 +8,7 @@ and presents them using a component which uses Mayflower Assets.
 
 ## Dependencies
 - Static assets copied from [Mayflower v3.1.0](http://mayflower.digital.mass.gov/)
-- RMV wait time data feed: https://www.massdot.state.ma.us/feeds/qmaticxml/qmaticXML.aspx
+- RMV wait time data feed: https://dotfeeds.state.ma.us/api/RMVBranchWaitTime/Index
 - CORS enabled API proxy using AWS (_since data source is not cors enabled_): http://docs.aws.amazon.com/apigateway/latest/developerguide/how-to-cors.html 
 
 ## Working with the App
@@ -25,4 +25,4 @@ This project uses [Browserify](http://browserify.org/) (_to bundle JS_) with [wa
 2. Click the `Header` tab
 3. Under the `Widget Area` click on the `Add iFrame` button.
 4. Use the following as the iframe source: `https://massgov.github.io/rmvwaittime/?town=Boston` where Boston is the name of the town whose location page you are building.  
-- For spelling and list of towns, see [raw MassDOT feed](https://www.massdot.state.ma.us/feeds/qmaticxml/qmaticXML.aspx).
+- For spelling and list of towns, see [raw MassDOT feed](https://dotfeeds.state.ma.us/api/RMVBranchWaitTime/Index).
